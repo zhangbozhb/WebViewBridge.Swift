@@ -2,169 +2,41 @@
 <html lang="en">
 <head>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"/>
+<!-- if you use in wkwebview you can ignore bridge_core.js -->
+  <script src="bridge_core.js"></script>
   <style>
-    html {
-      font-size: 16px;
-    }
-
-    body {
-      margin: 0 17px !important;
-    }
-
     img {
       max-width: 100% !important;
       width: 100%;
       touch-action: manipulation;
     }
-
-    h1, h1, h3, h4, h5, h6, p, span {
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      user-select: none;
-    }
-
-    #content {
-      margin: 0 !important;
-      padding: 0 !important;
-    }
   </style>
 </head>
 <body>
-    <img src="file:///default_cover"/>
-    <p>Image 1</p>
-    <img src="file:///default_cover"/>
-    <p>Image 2</p>
-    <img src="file:///default_cover"/>
-    <p>Image 3</p>
-    <img src="file:///default_cover"/>
-    <p>Image 5</p>
-    <img src="file:///default_cover"/>
-    <p>Image 5</p>
+<div id="image-container"><p>Image 1</p>
+  <img src="file:///default_cover"/>
+  <p>Image 2</p>
+  <img src="file:///default_cover"/>
+  <p>Image 3</p>
+  <img src="file:///default_cover"/>
+  <p>Image 4</p>
+  <img src="file:///default_cover"/>
+  <p>Image 5</p>
+  <img src="file:///default_cover"/>
+</div>
+<div>
+  <div id="native-time-btn" style="display: inline-block; padding: 6px 12px; line-height: 1.42857; text-align: center; white-space: nowrap; cursor: pointer; border: 1px solid transparent; border-radius: 4px; background-color: #337ab7;">Get Time From Native</div>
+  <p id="native-time-container">here should be time from native</p>
+</div>
+<div>
+  <div id="native-version-btn" style="display: inline-block; padding: 6px 12px; line-height: 1.42857; text-align: center; white-space: nowrap; cursor: pointer; border: 1px solid transparent; border-radius: 4px; background-color: #337ab7;">Get App Version</div>
+  <p id="native-version-container">here should be app version</p>
+</div>
 </body>
 <script>
-  var ZHWVBridge = window.ZHWVBridge || {};
-  window.ZHWVBridge = ZHWVBridge;
-
-  ZHWVBridge.Core = (function () {
-    var callbackId = 1;
-    var callbacks = {};
-    var actionQueue = [];
-
-    var createBridge = function () {
-      var iFrame;
-      iFrame = document.createElement("iframe");
-      iFrame.setAttribute("src", "zhWebViewBridge://__BRIDGE_LOADED__");
-      iFrame.setAttribute("style", "display:none;");
-      iFrame.setAttribute("height", "0px");
-      iFrame.setAttribute("width", "0px");
-      iFrame.setAttribute("frameborder", "0");
-      document.body.appendChild(iFrame);
-      setTimeout(function () {
-        document.body.removeChild(iFrame)
-      }, 0);
-    };
-
-    var callNativeHandler = function () {
-      var actionName = arguments[0];
-      var actionArgs = arguments[1] || [];
-      var successCallback = arguments[2];
-      var failCallback = arguments[3];
-      var actionId = ++callbackId;
-
-      if (successCallback || failCallback) {
-        callbacks[actionId] =  {success:successCallback, fail:failCallback};
-      } else {
-        actionId = 0;
-      }
-
-      var action = {
-        id: actionId,
-        name: actionName,
-        args: actionArgs,
-        argsCount: actionArgs.length
-      };
-      if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ZHWVBridge) {
-        window.webkit.messageHandlers.ZHWVBridge.postMessage(JSON.stringify([action]))
-      } else {
-        actionQueue.push(action);
-        createBridge();
-      }
-    };
-    var getAndClearQueuedActions = function () {
-      var json = JSON.stringify(actionQueue);
-      actionQueue = [];
-      return json;
-    };
-    var callbackJs = function () {
-      var data = arguments[0];
-      if (!data){
-        return
-      }
-      var callInfo = JSON.parse(data);
-      var callbackId = callInfo["id"];
-      var status = callInfo["status"];
-      var args = callInfo["args"];
-      if (!callbackId || status == undefined || args == undefined) {
-        return
-      }
-      var callback = callbacks[callbackId];
-      var success = callback["success"];
-      var fail = callback["fail"];
-      if (!callback) {
-        return
-      }
-      if (status && success) {
-        success.apply(this, args);
-      } else if (!status && fail) {
-        fail.apply(this, args);
-      }
-    };
-
-    var handlerMapper = {};
-    var callJsHandler = function (data) {
-      var callInfo = JSON.parse(data);
-      var name = callInfo["name"];
-      var args = callInfo["args"];
-      var argsCount = callInfo["argsCount"];
-      if (!name || argsCount == undefined || argsCount != args.length) {
-        return
-      }
-
-      var handler = handlerMapper[name];
-      if (handler) {
-        handler.apply(this, args);
-      }
-    };
-    var registerJsHandler = function (handlerName, callback) {
-      handlerMapper[handlerName] = callback
-    };
-
-    var ready =  function () {
-      var readyFunction = arguments[0];
-      if (readyFunction) {
-        document.addEventListener("DOMContentLoaded", readyFunction);
-      }
-    };
-
-    return {
-      // for native side
-      getAndClearJsActions: getAndClearQueuedActions,
-      callJsHandler: callJsHandler,
-      callbackJs: callbackJs,
-
-      // for js
-      registerJsHandler: registerJsHandler,
-      callNativeHandler: callNativeHandler,
-
-      ready: ready,
-    }
-  }());
-</script>
-
-<script>
-  var CoverBusiness = window.CoverBusiness || {};
-  window.CoverBusiness = CoverBusiness;
-  CoverBusiness.Image = (function () {
+  var MYBusiness = window.MYBusiness || {};
+  window.MYBusiness = MYBusiness;
+  MYBusiness.Image = (function () {
     var buildImageId = function (index) {
       return index + "_cover_image";
     };
@@ -186,16 +58,6 @@
       }
     };
 
-    var updatePlaceHolder = function (placeHolder) {
-      var items = document.getElementsByTagName('img');
-      for (var i = 0, count = items.length; i < count; ++i) {
-        var item = items[i];
-        if (item.src.toLocaleLowerCase() == "file:///default_cover") {
-          item.src = placeHolder;
-        }
-      }
-    };
-
     var updateImageAtIndex = function (image, index) {
       var item = document.getElementById(buildImageId(index));
       if (item && image) {
@@ -206,67 +68,69 @@
 
     return {
       setupEvents: setupEvents,
-      updatePlaceHolder: updatePlaceHolder,
       updateImageAtIndex: updateImageAtIndex
     };
   }());
 
-  CoverBusiness.Theme = (function () {
-    var setFontSize = function (size) {
-      document.body.style.fontSize = size;
-    };
-    var setNightStyle = function (isNight, force) {
-      var color = isNight? 'rgba(255,255,255,0.6)' : '#474747';
-      if (force) {
-        document.body.style.color = color;
-        var items = document.getElementsByTagName('p');
-        for(var i=0,count=items.length;i<count;i++) {
-          items[i].style.color = color;
-        }
-      } else {
-        document.body.style.color = color;
+  MYBusiness.Time = (function () {
+    var setupEvents = function () {
+      var item = document.getElementById("native-time-btn");
+      if (item) {
+        item.onclick = function () {
+          ZHWVBridge.Core.callNativeHandler("Time.GetCurrentTime");
+        };
       }
     };
-    
+    var updateTime = function (time) {
+      document.getElementById("native-time-container").textContent = time;
+    };
     return {
-      setFontSize: setFontSize,
-      setNightStyle: setNightStyle,
+      setupEvents: setupEvents,
+      updateTime: updateTime,
     };
   }());
 
-  CoverBusiness.Events = (function () {
-    var enableActivity = function () {
-      var prefix = "activity://";
-      var prefixLength = prefix.length;
-      var items = document.getElementsByTagName('a');
-      for(var i=0,count=items.length;i<count;i++) {
-        var item = items[i];
-        var href = item.href;
-        if (href && href.indexOf(prefix) === 0) {
-          var data = href.substring(prefixLength);
-          item.setAttribute("data", data);
-          item.onclick = function () {
-            ZHWVBridge.Core.callNativeHandler("Events.openWebView", [this.getAttribute("data")]);
-          }
-        }
+  MYBusiness.Device = (function () {
+    var setupEvents = function () {
+      var item = document.getElementById("native-version-btn");
+      if (item) {
+        item.onclick = function () {
+          ZHWVBridge.Core.callNativeHandler("Device.GetAppVersion");
+        };
       }
     };
-
+    var updateAppVersion = function (version) {
+      document.getElementById("native-version-container").textContent = version;
+      return "js get version: " + version;
+    };
     return {
-      enableActivity: enableActivity,
+      setupEvents: setupEvents,
+      updateAppVersion: updateAppVersion,
     };
   }());
-  ZHWVBridge.Core.registerJsHandler("Image.updatePlaceHolder", CoverBusiness.Image.updatePlaceHolder);
-  ZHWVBridge.Core.registerJsHandler("Image.updateImageAtIndex", CoverBusiness.Image.updateImageAtIndex);
-  ZHWVBridge.Core.registerJsHandler("Theme.setFontSize", CoverBusiness.Theme.setFontSize);
-  ZHWVBridge.Core.registerJsHandler("Theme.setNightStyle", CoverBusiness.Theme.setNightStyle);
 
 
 
   ZHWVBridge.Core.ready(function () {
-    CoverBusiness.Image.setupEvents();
-    ZHWVBridge.Core.callNativeHandler("Image.updatePlaceHolder");
+    MYBusiness.Image.setupEvents();
+    ZHWVBridge.Core.registerJsHandler("Image.updateImageAtIndex", MYBusiness.Image.updateImageAtIndex);
+    ZHWVBridge.Core.callNativeHandler(
+            "Image.updatePlaceHolder",
+            [],
+            function(placeHolder) {
+              var items = document.getElementsByTagName('img');
+              for (var i = 0, count = items.length; i < count; ++i) {
+                var item = items[i];
+                if (item.src.toLocaleLowerCase() == "file:///default_cover") {
+                  item.src = placeHolder;
+                }
+              }
+            });
+    MYBusiness.Time.setupEvents();
+    ZHWVBridge.Core.registerJsHandler("Time.updateTime", MYBusiness.Time.updateTime);
+
+    MYBusiness.Device.setupEvents();
+    ZHWVBridge.Core.registerJsHandler("Device.updateAppVersion", MYBusiness.Device.updateAppVersion);
   });
-  CoverBusiness.Events.enableActivity();
 </script>
 </html>

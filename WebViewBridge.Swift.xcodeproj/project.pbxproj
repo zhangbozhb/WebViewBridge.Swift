@@ -19,6 +19,7 @@
 		EDF09E501D17B70A00A5583D /* html_template.html in Resources */ = {isa = PBXBuildFile; fileRef = EDF09E4F1D17B70A00A5583D /* html_template.html */; };
 		EDF09E521D17B7D300A5583D /* ZHData.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF09E511D17B7D300A5583D /* ZHData.swift */; };
 		EDF09E541D17BBED00A5583D /* place_holder.png in Resources */ = {isa = PBXBuildFile; fileRef = EDF09E531D17BBED00A5583D /* place_holder.png */; };
+		EDF09E5A1D180D3000A5583D /* bridge_core.js in Resources */ = {isa = PBXBuildFile; fileRef = EDF09E591D180D3000A5583D /* bridge_core.js */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 		EDF09E4F1D17B70A00A5583D /* html_template.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = html_template.html; sourceTree = "<group>"; };
 		EDF09E511D17B7D300A5583D /* ZHData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ZHData.swift; path = ../ZHData.swift; sourceTree = "<group>"; };
 		EDF09E531D17BBED00A5583D /* place_holder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = place_holder.png; sourceTree = "<group>"; };
+		EDF09E591D180D3000A5583D /* bridge_core.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = bridge_core.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -143,6 +145,7 @@
 		ED90A3651D167DBE003FA3A5 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				EDF09E591D180D3000A5583D /* bridge_core.js */,
 				ED90A3661D167DBE003FA3A5 /* ZHWebViewBridge.swift */,
 			);
 			path = Sources;
@@ -255,6 +258,7 @@
 				EDF09E541D17BBED00A5583D /* place_holder.png in Resources */,
 				ED90A33B1D1661DA003FA3A5 /* LaunchScreen.storyboard in Resources */,
 				EDF09E501D17B70A00A5583D /* html_template.html in Resources */,
+				EDF09E5A1D180D3000A5583D /* bridge_core.js in Resources */,
 				ED90A3381D1661DA003FA3A5 /* Assets.xcassets in Resources */,
 				ED90A3361D1661DA003FA3A5 /* Main.storyboard in Resources */,
 			);

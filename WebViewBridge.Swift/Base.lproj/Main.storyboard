@@ -16,9 +16,24 @@
                     <view key="view" contentMode="scaleToFill" id="qip-ou-wBp">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mNr-ze-ZZq">
+                                <rect key="frame" x="0.0" y="20" width="600" height="531"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
+                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="mNr-ze-ZZq" firstAttribute="leading" secondItem="qip-ou-wBp" secondAttribute="leading" id="3Dx-jR-rka"/>
+                            <constraint firstItem="mNr-ze-ZZq" firstAttribute="top" secondItem="oc4-bo-Vow" secondAttribute="bottom" id="VBd-TZ-TBQ"/>
+                            <constraint firstItem="GT8-qY-q1y" firstAttribute="top" secondItem="mNr-ze-ZZq" secondAttribute="bottom" id="WLD-EX-oK3"/>
+                            <constraint firstAttribute="trailing" secondItem="mNr-ze-ZZq" secondAttribute="trailing" id="byR-MS-jSk"/>
+                        </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="WKWebView" id="ADO-fs-pSU"/>
+                    <connections>
+                        <outlet property="container" destination="mNr-ze-ZZq" id="xgu-Cx-rmH"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="fFo-Mp-wkc" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -35,9 +50,24 @@
                     <view key="view" contentMode="scaleToFill" id="Md5-dC-x1c">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BeC-2y-rCZ">
+                                <rect key="frame" x="0.0" y="20" width="600" height="531"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
+                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="BeC-2y-rCZ" firstAttribute="top" secondItem="7wk-pO-NlW" secondAttribute="bottom" id="371-lL-3L1"/>
+                            <constraint firstAttribute="trailing" secondItem="BeC-2y-rCZ" secondAttribute="trailing" id="Sto-WH-rF4"/>
+                            <constraint firstItem="BeC-2y-rCZ" firstAttribute="leading" secondItem="Md5-dC-x1c" secondAttribute="leading" id="mmV-Wc-Ak9"/>
+                            <constraint firstItem="U4k-wX-zk5" firstAttribute="top" secondItem="BeC-2y-rCZ" secondAttribute="bottom" id="pvy-2T-tMS"/>
+                        </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="UIWebView" id="Xi1-19-ark"/>
+                    <connections>
+                        <outlet property="container" destination="BeC-2y-rCZ" id="7zC-L6-Qat"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="uiC-vn-sxB" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

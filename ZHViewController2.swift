@@ -10,6 +10,7 @@ import UIKit
 import WebKit
 
 class ZHViewController2: UIViewController {
+    @IBOutlet weak var container: UIView!
     var webView:WKWebView!
     var bridge:ZHWebViewBridge!
     
@@ -19,38 +20,56 @@ class ZHViewController2: UIViewController {
         
         webView = WKWebView()
         webView.frame = view.bounds
-        view.addSubview(webView)
+        container.addSubview(webView)
         
         bridge = ZHWebViewBridge.bridge(webView)
         
-        bridge.registerHandler("Image.updatePlaceHolder") { [weak self](args:[AnyObject]) -> (Bool, AnyObject?) in
-            self?.bridge.callHander("Image.updatePlaceHolder", args: ["place_holder.png"], callback: nil)
-            return (true, nil)
+        bridge.registerHandler("Image.updatePlaceHolder") { (args:[AnyObject]) -> (Bool, [AnyObject]?) in
+            return (true, ["place_holder.png"])
         }
-        bridge.registerHandler("Image.ViewImage") { [weak self](args:[AnyObject]) -> (Bool, AnyObject?) in
+        bridge.registerHandler("Image.ViewImage") { [weak self](args:[AnyObject]) -> (Bool, [AnyObject]?) in
             if let index = args.first as? Int where args.count == 1 {
                 self?.viewImageAtIndex(index)
                 return (true, nil)
             }
             return (false, nil)
         }
-        bridge.registerHandler("Image.DownloadImage") { [weak self](args:[AnyObject]) -> (Bool, AnyObject?) in
+        bridge.registerHandler("Image.DownloadImage") { [weak self](args:[AnyObject]) -> (Bool, [AnyObject]?) in
             if let index = args.first as? Int where args.count == 1 {
                 self?.downloadImageAtIndex(index)
                 return (true, nil)
             }
             return (false, nil)
         }
-        
-        
+        bridge.registerHandler("Time.GetCurrentTime") { [weak self](args:[AnyObject]) -> (Bool, [AnyObject]?) in
+            self?.bridge.callJsHander("Time.updateTime", args: [NSDate.init().description])
+            return (true, nil)
+        }
+        bridge.registerHandler("Device.GetAppVersion") { [weak self](args:[AnyObject]) -> (Bool, [AnyObject]?) in
+            self?.bridge.callJsHander("Device.updateAppVersion", args: [NSBundle.mainBundle().objectForInfoDictionaryKey("CFBundleShortVersionString") as! String], callback: { (data:AnyObject?) in
+                if let data = data as? String {
+                    let alert = UIAlertController.init(title: "Device.updateAppVersion", message: data, preferredStyle: .Alert)
+                    alert.addAction(UIAlertAction.init(title: "OK", style: .Default, handler: { [weak self](_:UIAlertAction) in
+                        self?.dismissViewControllerAnimated(false, completion: nil)
+                        }))
+                    self?.presentViewController(alert, animated: true, completion: nil)
+                }
+            })
+            return (true, nil)
+        }
+    
         prepareResources()
         webView.loadHTMLString(ZHData.instance.htmlData, baseURL:  NSURL.init(fileURLWithPath: ZHData.instance.imageFolder))
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        webView.frame = container.bounds
+    }
     
     func prepareResources() {
         let basePath = ZHData.instance.imageFolder
-        let resources = ["place_holder.png"]
+        let resources = ["place_holder.png", "bridge_core.js"]
         for resource in resources {
             if let path = NSBundle.mainBundle().pathForResource(resource, ofType: nil) {
                 let targetPath = (basePath as NSString).stringByAppendingPathComponent(resource)
@@ -62,7 +81,7 @@ class ZHViewController2: UIViewController {
     }
     
     func viewImageAtIndex(index:Int) {
-        let alert = UIAlertController.init(title: "ViewImage \(index)", message: nil, preferredStyle: .Alert)
+        let alert = UIAlertController.init(title: "ViewImage atIndex \(index)", message: nil, preferredStyle: .Alert)
         alert.addAction(UIAlertAction.init(title: "OK", style: .Default, handler: { [weak self](_:UIAlertAction) in
             self?.dismissViewControllerAnimated(false, completion: nil)
             }))
@@ -74,7 +93,7 @@ class ZHViewController2: UIViewController {
         if index < images.count {
             let image = images[index]
             ZHData.instance.downloadImage(image, handler: { [weak self](file:String) in
-                self?.bridge.callHander("Image.updateImageAtIndex", args: [file, index], callback: nil)
+                self?.bridge.callJsHander("Image.updateImageAtIndex", args: [file, index], callback: nil)
                 })
             
         }
