@@ -42,11 +42,11 @@ class ZHViewController1: UIViewController, UIWebViewDelegate {
             return (false, nil)
         }
         bridge.registerHandler("Time.GetCurrentTime") { [weak self](args:[AnyObject]) -> (Bool, [AnyObject]?) in
-            self?.bridge.callJsHander("Time.updateTime", args: [NSDate.init().description])
+            self?.bridge.callJsHandler("Time.updateTime", args: [NSDate.init().description])
             return (true, nil)
         }
         bridge.registerHandler("Device.GetAppVersion") { [weak self](args:[AnyObject]) -> (Bool, [AnyObject]?) in
-            self?.bridge.callJsHander("Device.updateAppVersion", args: [NSBundle.mainBundle().objectForInfoDictionaryKey("CFBundleShortVersionString") as! String], callback: { (data:AnyObject?) in
+            self?.bridge.callJsHandler("Device.updateAppVersion", args: [NSBundle.mainBundle().objectForInfoDictionaryKey("CFBundleShortVersionString") as! String], callback: { (data:AnyObject?) in
                 if let data = data as? String {
                     let alert = UIAlertController.init(title: "Device.updateAppVersion", message: data, preferredStyle: .Alert)
                     alert.addAction(UIAlertAction.init(title: "OK", style: .Default, handler: { [weak self](_:UIAlertAction) in
@@ -72,7 +72,7 @@ class ZHViewController1: UIViewController, UIWebViewDelegate {
     }
     
     func webView(webView: UIWebView, shouldStartLoadWithRequest request: NSURLRequest, navigationType: UIWebViewNavigationType) -> Bool {
-        return !bridge.handlerRequest(request)
+        return !bridge.handleRequest(request)
     }
     
     
@@ -102,7 +102,7 @@ class ZHViewController1: UIViewController, UIWebViewDelegate {
         if index < images.count {
             let image = images[index]
             ZHData.instance.downloadImage(image, handler: { [weak self](file:String) in
-                self?.bridge.callJsHander("Image.updateImageAtIndex", args: [file, index], callback: nil)
+                self?.bridge.callJsHandler("Image.updateImageAtIndex", args: [file, index], callback: nil)
             })
             
         }
