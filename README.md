@@ -23,7 +23,7 @@ If your have any question, you can email me(zhangbozhb@gmail.com) or leave messa
 
 
 ###ScreenShots
-![WebViewBridge.Swift](https://github.com/zhangbozhb/WebViewBridge.Swift/screenshots_1.gif)
+![WebViewBridge.Swift](https://github.com/zhangbozhb/WebViewBridge.Swift/blob/master/screenshots_1.gif)
 
 ## Usage
 
