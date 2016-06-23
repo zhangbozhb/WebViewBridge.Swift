@@ -41,15 +41,15 @@ class ZHBridgeActionResult {
     }
 }
 
-class ZHBridgeHelper {
-    class func serializeData(data:AnyObject) ->String {
+public class ZHBridgeHelper {
+    public final class func serializeData(data:AnyObject) ->String {
         if let json = try? NSJSONSerialization.dataWithJSONObject(data, options: NSJSONWritingOptions.init(rawValue: 0)) {
             return NSString.init(data: json, encoding: NSUTF8StringEncoding) as! String
         }
         return ""
     }
     
-    class func deserializeData(data:String) -> AnyObject? {
+    public final class func deserializeData(data:String) -> AnyObject? {
         if let encodeData = data.dataUsingEncoding(NSUTF8StringEncoding), obj = try? NSJSONSerialization.JSONObjectWithData(encodeData, options: NSJSONReadingOptions.AllowFragments) {
             return obj
         }

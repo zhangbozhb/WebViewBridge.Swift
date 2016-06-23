@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "WebViewBridge.Swift"
-  s.version      = "0.1"
+  s.version      = "0.2"
   s.summary      = "A lightweight bridge for WebView and native code written in Swift."
 
   # This description is used to generate tags and improve search results.
