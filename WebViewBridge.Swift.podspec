@@ -13,10 +13,10 @@ Pod::Spec.new do |s|
   #  These will help people to find your library, and whilst it
   #  can feel like a chore to fill in it's definitely to your advantage. The
   #  summary should be tweet-length, and the description more in depth.
-  #
+  #  pod trunk push WebViewBridge.Swift.podspec
 
   s.name         = "WebViewBridge.Swift"
-  s.version      = "0.2"
+  s.version      = "0.1"
   s.summary      = "A lightweight bridge for WebView and native code written in Swift."
 
   # This description is used to generate tags and improve search results.
@@ -41,7 +41,7 @@ Pod::Spec.new do |s|
   # s.watchos.deployment_target = "2.0"
   # s.tvos.deployment_target = "9.0"
 
-  s.source       = { :git => "https://github.com/zhangbozhb/WebViewBridge.Swift.git", :tag => "0.0.1" }
+  s.source       = { :git => "https://github.com/zhangbozhb/WebViewBridge.Swift.git", :tag => s.version }
 
 
   s.source_files  = ["Sources/*.swift", "Sources/*.js"]
