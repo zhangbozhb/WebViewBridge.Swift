@@ -9,7 +9,7 @@
 
 
 A lightweight bridge for WebView and native code written in Swift.
-Bridge is not a new topic, there are existing awesome projects, <a herf="https://github.com/apache/Cordova-ios">Cordova(PhoneGap)</a>, <a herf="https://github.com/marcuswestin/WebViewJavascriptBridge">WebViewJavascriptBridge</a> and so on.
+Bridge is not a new topic, there are existing awesome projects, <a href="https://github.com/apache/Cordova-ios">Cordova(PhoneGap)</a>, <a href="https://github.com/marcuswestin/WebViewJavascriptBridge">WebViewJavascriptBridge</a> and so on.
 Cordova(PhoneGap) is a great project and cross platform, well tested. However if we do not want to develop hybrid app, it seems kind of too complex and hard to integrate to our app.
 WebViewJavascriptBridge is simple and have both iOS and android version. However it has no Swift version and does not make new feature of WKWebView.
 If you just want to integrate bridge feature to you app, WebViewBridge.Swift supplies you another choice. It's brief, simple but works well.
@@ -148,8 +148,8 @@ github "zhangbozhb/WebViewBridge.Swift"
 # WebViewBridge.Swift 介绍
 WebViewBridge.Swift 封装了WebView js 和 Native代码的调用.
 WebView与Native桥并不是一个新的话题, 在很早以前就有实现了, 也有很好的实现.
-比如 <a herf="https://github.com/apache/Cordova-ios">Cordova(PhoneGap)</a>, <a herf="https://github.com/marcuswestin/WebViewJavascriptBridge">WebViewJavascriptBridge</a>
-桥本身的技术并不困难, 实现也都大同小异, 既然已经有项目 <a herf="https://github.com/apache/Cordova-ios">Cordova(PhoneGap)</a>, <a herf="https://github.com/marcuswestin/WebViewJavascriptBridge">WebViewJavascriptBridge</a>, 那还有必要重复再造轮子么?
+比如 <a href="https://github.com/apache/Cordova-ios">Cordova(PhoneGap)</a>, <a href="https://github.com/marcuswestin/WebViewJavascriptBridge">WebViewJavascriptBridge</a>
+桥本身的技术并不困难, 实现也都大同小异, 既然已经有项目 <a href="https://github.com/apache/Cordova-ios">Cordova(PhoneGap)</a>, <a href="https://github.com/marcuswestin/WebViewJavascriptBridge">WebViewJavascriptBridge</a>, 那还有必要重复再造轮子么?
 - Cordova-ios: 本身是一个很了不起的项目, 提供了多个平台, 对于 Hybrid App而言, 是一个很好的选择;
 如果你编写的不是Hybrid App, 只是想简单的集成 bridge这个功能, Cordova 就显得过于复杂了, 不方面集成, 另外暂时也无 swift 版本的
 - WebViewJavascriptBridge: 也很不错, 同时提供了 iOS, android 版本, 集成也简单方便.
