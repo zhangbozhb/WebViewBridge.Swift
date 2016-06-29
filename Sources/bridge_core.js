@@ -1,7 +1,7 @@
-var ZHWVBridge = window.ZHWVBridge || {};
-window.ZHWVBridge = ZHWVBridge;
+var ZHBridge = window.ZHBridge || {};
+window.ZHBridge = ZHBridge;
 
-ZHWVBridge.Core = ZHWVBridge.Core || (function () {
+ZHBridge.Core = ZHBridge.Core || (function () {
   var callbackId = 1;
   var callbacks = {};
   var actionQueue = [];
@@ -9,7 +9,7 @@ ZHWVBridge.Core = ZHWVBridge.Core || (function () {
   var createBridge = function () {
     var iFrame;
     iFrame = document.createElement("iframe");
-    iFrame.setAttribute("src", "ZHWVBridge://__BRIDGE_LOADED__");
+    iFrame.setAttribute("src", "ZHBridge://__BRIDGE_LOADED__");
     iFrame.setAttribute("style", "display:none;");
     iFrame.setAttribute("height", "0px");
     iFrame.setAttribute("width", "0px");
@@ -40,9 +40,9 @@ ZHWVBridge.Core = ZHWVBridge.Core || (function () {
       argsCount: actionArgs.length
     };
     if (window.webkit && window.webkit.messageHandlers
-      && window.webkit.messageHandlers.ZHWVBridge
-      && window.webkit.messageHandlers.ZHWVBridge.postMessage) {
-      window.webkit.messageHandlers.ZHWVBridge.postMessage(JSON.stringify([action]))
+      && window.webkit.messageHandlers.ZHBridge
+      && window.webkit.messageHandlers.ZHBridge.postMessage) {
+      window.webkit.messageHandlers.ZHBridge.postMessage(JSON.stringify([action]))
     } else {
       actionQueue.push(action);
       createBridge();

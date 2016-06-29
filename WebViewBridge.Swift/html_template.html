@@ -49,9 +49,9 @@
           item.id = buildImageId(i);
           item.onclick = function () {
             if (this.getAttribute("data_loaded")) {
-              ZHWVBridge.Core.callNativeHandler("Image.ViewImage", [parseInt(this.id)]);
+              ZHBridge.Core.callNativeHandler("Image.ViewImage", [parseInt(this.id)]);
             } else {
-              ZHWVBridge.Core.callNativeHandler("Image.DownloadImage", [parseInt(this.id)]);
+              ZHBridge.Core.callNativeHandler("Image.DownloadImage", [parseInt(this.id)]);
             }
           };
         }
@@ -77,7 +77,7 @@
       var item = document.getElementById("native-time-btn");
       if (item) {
         item.onclick = function () {
-          ZHWVBridge.Core.callNativeHandler("Time.GetCurrentTime");
+          ZHBridge.Core.callNativeHandler("Time.GetCurrentTime");
         };
       }
     };
@@ -95,7 +95,7 @@
       var item = document.getElementById("native-version-btn");
       if (item) {
         item.onclick = function () {
-          ZHWVBridge.Core.callNativeHandler("Device.GetAppVersion");
+          ZHBridge.Core.callNativeHandler("Device.GetAppVersion");
         };
       }
     };
@@ -111,10 +111,10 @@
 
 
 
-  ZHWVBridge.Core.ready(function () {
+  ZHBridge.Core.ready(function () {
     MYBusiness.Image.setupEvents();
-    ZHWVBridge.Core.registerJsHandler("Image.updateImageAtIndex", MYBusiness.Image.updateImageAtIndex);
-    ZHWVBridge.Core.callNativeHandler(
+    ZHBridge.Core.registerJsHandler("Image.updateImageAtIndex", MYBusiness.Image.updateImageAtIndex);
+    ZHBridge.Core.callNativeHandler(
             "Image.updatePlaceHolder",
             [],
             function(placeHolder) {
@@ -127,10 +127,10 @@
               }
             });
     MYBusiness.Time.setupEvents();
-    ZHWVBridge.Core.registerJsHandler("Time.updateTime", MYBusiness.Time.updateTime);
+    ZHBridge.Core.registerJsHandler("Time.updateTime", MYBusiness.Time.updateTime);
 
     MYBusiness.Device.setupEvents();
-    ZHWVBridge.Core.registerJsHandler("Device.updateAppVersion", MYBusiness.Device.updateAppVersion);
+    ZHBridge.Core.registerJsHandler("Device.updateAppVersion", MYBusiness.Device.updateAppVersion);
   });
 </script>
 </html>

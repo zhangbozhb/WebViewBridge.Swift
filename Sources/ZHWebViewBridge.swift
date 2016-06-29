@@ -86,7 +86,7 @@ extension ZHBridgeActionResult {
 }
 
 
-private let ZHWebViewBridgeJS = "var ZHWVBridge=window.ZHWVBridge||{};window.ZHWVBridge=ZHWVBridge,ZHWVBridge.Core=ZHWVBridge.Core||function(){var e=1,t={},i=[],r=function(){var e;e=document.createElement(\"iframe\"),e.setAttribute(\"src\",\"ZHWVBridge://__BRIDGE_LOADED__\"),e.setAttribute(\"style\",\"display:none;\"),e.setAttribute(\"height\",\"0px\"),e.setAttribute(\"width\",\"0px\"),e.setAttribute(\"frameborder\",\"0\"),document.body.appendChild(e),setTimeout(function(){document.body.removeChild(e)},0)},n=function(){var n=arguments[0],s=arguments[1]||[],a=arguments[2],d=arguments[3],o=++e;a||d?t[o]={success:a,fail:d}:o=0;var g={id:o,name:n,args:s,argsCount:s.length};window.webkit&&window.webkit.messageHandlers&&window.webkit.messageHandlers.ZHWVBridge&&window.webkit.messageHandlers.ZHWVBridge.postMessage?window.webkit.messageHandlers.ZHWVBridge.postMessage(JSON.stringify([g])):(i.push(g),r())},s=function(){var e=JSON.stringify(i);return i=[],e},a=function(){var e=arguments[0];if(e){var i=JSON.parse(e),r=i.id,n=i.status,s=i.args;if(r&&void 0!=n&&void 0!=s){var a=t[r],d=a.success,o=a.fail;if(a){var g=void 0;return n&&d?g=d.apply(this,s):!n&&o&&(g=o.apply(this,s)),void 0!=g?JSON.stringify(g):void 0}}}},d={},o=function(e){var t=JSON.parse(e),i=t.name,r=t.args,n=t.argsCount;if(i&&void 0!=n&&n==r.length){var s=d[i];if(s){var a=s.apply(this,r);return void 0!=a?JSON.stringify(a):void 0}}},g=function(e,t){d[e]=t},u=function(){var e=arguments[0];e&&document.addEventListener(\"DOMContentLoaded\",e)};return{getAndClearJsActions:s,callJsHandler:o,callbackJs:a,registerJsHandler:g,callNativeHandler:n,ready:u}}();"
+private let ZHWebViewBridgeJS = "var ZHBridge=window.ZHBridge||{};window.ZHBridge=ZHBridge,ZHBridge.Core=ZHBridge.Core||function(){var e=1,t={},i=[],r=function(){var e;e=document.createElement(\"iframe\"),e.setAttribute(\"src\",\"ZHBridge://__BRIDGE_LOADED__\"),e.setAttribute(\"style\",\"display:none;\"),e.setAttribute(\"height\",\"0px\"),e.setAttribute(\"width\",\"0px\"),e.setAttribute(\"frameborder\",\"0\"),document.body.appendChild(e),setTimeout(function(){document.body.removeChild(e)},0)},n=function(){var n=arguments[0],s=arguments[1]||[],a=arguments[2],d=arguments[3],o=++e;a||d?t[o]={success:a,fail:d}:o=0;var g={id:o,name:n,args:s,argsCount:s.length};window.webkit&&window.webkit.messageHandlers&&window.webkit.messageHandlers.ZHBridge&&window.webkit.messageHandlers.ZHBridge.postMessage?window.webkit.messageHandlers.ZHBridge.postMessage(JSON.stringify([g])):(i.push(g),r())},s=function(){var e=JSON.stringify(i);return i=[],e},a=function(){var e=arguments[0];if(e){var i=JSON.parse(e),r=i.id,n=i.status,s=i.args;if(r&&void 0!=n&&void 0!=s){var a=t[r],d=a.success,o=a.fail;if(a){var g=void 0;return n&&d?g=d.apply(this,s):!n&&o&&(g=o.apply(this,s)),void 0!=g?JSON.stringify(g):void 0}}}},d={},o=function(e){var t=JSON.parse(e),i=t.name,r=t.args,n=t.argsCount;if(i&&void 0!=n&&n==r.length){var s=d[i];if(s){var a=s.apply(this,r);return void 0!=a?JSON.stringify(a):void 0}}},g=function(e,t){d[e]=t},u=function(){var e=arguments[0];e&&document.addEventListener(\"DOMContentLoaded\",e)};return{getAndClearJsActions:s,callJsHandler:o,callbackJs:a,registerJsHandler:g,callNativeHandler:n,ready:u}}();"
 
 protocol ZHWebViewBridgeProtocol:class {
     func zh_evaluateJavaScript(javaScriptString: String,
@@ -95,7 +95,7 @@ protocol ZHWebViewBridgeProtocol:class {
 
 extension ZHWebViewBridgeProtocol {
     func zh_unpackActions(handler:([ZHBridgeAction] -> Void)) {
-        zh_evaluateJavaScript("ZHWVBridge.Core.getAndClearJsActions()") { (res:AnyObject?, _:NSError?) in
+        zh_evaluateJavaScript("ZHBridge.Core.getAndClearJsActions()") { (res:AnyObject?, _:NSError?) in
             handler(ZHBridgeHelper.unpackActions(res))
         }
     }
@@ -106,7 +106,7 @@ extension ZHWebViewBridgeProtocol {
             "args": args,
             "argsCount": args.count
         ]
-        zh_evaluateJavaScript("ZHWVBridge.Core.callJsHandler('\(ZHBridgeHelper.serializeData(handlerInfo))')") { (res:AnyObject?, _:NSError?) in
+        zh_evaluateJavaScript("ZHBridge.Core.callJsHandler('\(ZHBridgeHelper.serializeData(handlerInfo))')") { (res:AnyObject?, _:NSError?) in
             callback?(ZHBridgeHelper.unpackResult(res))
         }
     }
@@ -120,7 +120,7 @@ extension ZHWebViewBridgeProtocol {
             "status": result.status,
             "args": (result.result == nil) ? [NSNull()] : [result.result!]
         ]
-        zh_evaluateJavaScript("ZHWVBridge.Core.callbackJs('\(ZHBridgeHelper.serializeData(callbackInfo))')", completionHandler: nil)
+        zh_evaluateJavaScript("ZHBridge.Core.callbackJs('\(ZHBridgeHelper.serializeData(callbackInfo))')", completionHandler: nil)
     }
 }
 
@@ -152,7 +152,7 @@ class ZHBridgeWKScriptMessageHandler:NSObject, WKScriptMessageHandler {
             return
         }
         
-        if let body = message.body as? String where message.name == "ZHWVBridge" && !body.isEmpty{
+        if let body = message.body as? String where message.name == "ZHBridge" && !body.isEmpty{
             bridge.handlerActions(ZHBridgeHelper.unpackActions(body))
         }
     }
@@ -205,7 +205,7 @@ public class ZHWebViewBridge {
      - returns: true can handle, false can not handle
      */
     public final func canHandle(request: NSURLRequest) -> Bool {
-        let scheme = "ZHWVBridge"
+        let scheme = "ZHBridge"
         if let url = request.URL where url.scheme.caseInsensitiveCompare(scheme) == .OrderedSame {
             return true
         }
@@ -257,7 +257,7 @@ public class ZHWebViewBridge {
         if injectBridgeJs {
             webView.configuration.userContentController.addUserScript(WKUserScript.init(source: ZHWebViewBridgeJS, injectionTime: .AtDocumentStart, forMainFrameOnly: true))
         }
-        webView.configuration.userContentController.addScriptMessageHandler(bridge.messageHandler, name: "ZHWVBridge")
+        webView.configuration.userContentController.addScriptMessageHandler(bridge.messageHandler, name: "ZHBridge")
         
         return bridge
     }

@@ -59,7 +59,7 @@ func webView(webView: UIWebView, shouldStartLoadWithRequest request: NSURLReques
 
 **a**, write js handler in you html or you business js
 ```javascript
-ZHWVBridge.Core.registerJsHandler(
+ZHBridge.Core.registerJsHandler(
           "Device.updateAppVersion",
           function (version) {
             document.getElementById("native-version-container").textContent = version;
@@ -67,7 +67,7 @@ ZHWVBridge.Core.registerJsHandler(
           });
 ```
 
-* Note: ZHWVBridge.Core.registerJsHandler(handlerName, callback)
+* Note: ZHBridge.Core.registerJsHandler(handlerName, callback)
 
 **b**, call js handler from native
 ```swift
@@ -92,7 +92,7 @@ bridge.registerHandler("Image.updatePlaceHolder") { (args:[AnyObject]) -> (Bool,
 
 **b**, call from js
 ```javascript
-ZHWVBridge.Core.callNativeHandler(
+ZHBridge.Core.callNativeHandler(
             "Image.updatePlaceHolder",
             [],
             function(placeHolder) {
@@ -106,7 +106,7 @@ ZHWVBridge.Core.callNativeHandler(
             });
 ```
 
-* Note: ZHWVBridge.Core.callNativeHandler(handlerName, argArrayPassToNativeHandler, successCallback, failCallback)
+* Note: ZHBridge.Core.callNativeHandler(handlerName, argArrayPassToNativeHandler, successCallback, failCallback)
 
 
 ## Installation
@@ -192,7 +192,7 @@ func webView(webView: UIWebView, shouldStartLoadWithRequest request: NSURLReques
 
 **a**, 在你的html中或业务 js 中 添加 js handler
 ```javascript
-ZHWVBridge.Core.registerJsHandler(
+ZHBridge.Core.registerJsHandler(
           "Device.updateAppVersion",
           function (version) {
             document.getElementById("native-version-container").textContent = version;
@@ -200,7 +200,7 @@ ZHWVBridge.Core.registerJsHandler(
           });
 ```
 
-* 说明: ZHWVBridge.Core.registerJsHandler(handlerName, callback)
+* 说明: ZHBridge.Core.registerJsHandler(handlerName, callback)
 
 **b**, 原生代码调用 js handler
 ```swift
@@ -226,7 +226,7 @@ bridge.registerHandler("Image.updatePlaceHolder") { (args:[AnyObject]) -> (Bool,
 
 **b**, js 调用原生 handler
 ```javascript
-ZHWVBridge.Core.callNativeHandler(
+ZHBridge.Core.callNativeHandler(
             "Image.updatePlaceHolder",
             [],
             function(placeHolder) {
@@ -240,5 +240,5 @@ ZHWVBridge.Core.callNativeHandler(
             });
 ```
 
-* 说明: ZHWVBridge.Core.callNativeHandler(handlerName, 传递给原生handler的参数数组, 成功回调, 失败回调)
+* 说明: ZHBridge.Core.callNativeHandler(handlerName, 传递给原生handler的参数数组, 成功回调, 失败回调)
 
