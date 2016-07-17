@@ -8,6 +8,7 @@
 
 import UIKit
 import WebKit
+import JavaScriptCore
 
 class ZHBridgeAction {
     var actionId:Int64 = 0
@@ -86,7 +87,7 @@ extension ZHBridgeActionResult {
 }
 
 
-private let ZHWebViewBridgeJS = "var ZHBridge=window.ZHBridge||{};window.ZHBridge=ZHBridge,ZHBridge.Core=ZHBridge.Core||function(){var e=1,t={},i=[],r=function(){var e;e=document.createElement(\"iframe\"),e.setAttribute(\"src\",\"ZHBridge://__BRIDGE_LOADED__\"),e.setAttribute(\"style\",\"display:none;\"),e.setAttribute(\"height\",\"0px\"),e.setAttribute(\"width\",\"0px\"),e.setAttribute(\"frameborder\",\"0\"),document.body.appendChild(e),setTimeout(function(){document.body.removeChild(e)},0)},n=function(){var n=arguments[0],s=arguments[1]||[],a=arguments[2],d=arguments[3],o=++e;a||d?t[o]={success:a,fail:d}:o=0;var g={id:o,name:n,args:s,argsCount:s.length};window.webkit&&window.webkit.messageHandlers&&window.webkit.messageHandlers.ZHBridge&&window.webkit.messageHandlers.ZHBridge.postMessage?window.webkit.messageHandlers.ZHBridge.postMessage(JSON.stringify([g])):(i.push(g),r())},s=function(){var e=JSON.stringify(i);return i=[],e},a=function(){var e=arguments[0];if(e){var i=JSON.parse(e),r=i.id,n=i.status,s=i.args;if(r&&void 0!=n&&void 0!=s){var a=t[r],d=a.success,o=a.fail;if(a){var g=void 0;return n&&d?g=d.apply(this,s):!n&&o&&(g=o.apply(this,s)),void 0!=g?JSON.stringify(g):void 0}}}},d={},o=function(e){var t=JSON.parse(e),i=t.name,r=t.args,n=t.argsCount;if(i&&void 0!=n&&n==r.length){var s=d[i];if(s){var a=s.apply(this,r);return void 0!=a?JSON.stringify(a):void 0}}},g=function(e,t){d[e]=t},u=function(){var e=arguments[0];e&&document.addEventListener(\"DOMContentLoaded\",e)};return{getAndClearJsActions:s,callJsHandler:o,callbackJs:a,registerJsHandler:g,callNativeHandler:n,ready:u}}();"
+private let ZHWebViewBridgeJS = "var ZHBridge=window.ZHBridge||{};window.ZHBridge=ZHBridge;ZHBridge.Core=ZHBridge.Core||(function(){var callbackId=1;var callbacks={};var actionQueue=[];var createBridge=function(){var iFrame;iFrame=document.createElement(\"iframe\");iFrame.setAttribute(\"src\",\"ZHBridge://__BRIDGE_LOADED__\");iFrame.setAttribute(\"style\",\"display:none;\");iFrame.setAttribute(\"height\",\"0px\");iFrame.setAttribute(\"width\",\"0px\");iFrame.setAttribute(\"frameborder\",\"0\");document.body.appendChild(iFrame);setTimeout(function(){document.body.removeChild(iFrame)},0)};var callNativeHandler=function(){var actionName=arguments[0];var actionArgs=arguments[1]||[];var successCallback=arguments[2];var failCallback=arguments[3];var actionId=++callbackId;if(successCallback||failCallback){callbacks[actionId]={success:successCallback,fail:failCallback}}else{actionId=0}var action={id:actionId,name:actionName,args:actionArgs,argsCount:actionArgs.length};if(window.webkit&&window.webkit.messageHandlers&&window.webkit.messageHandlers.ZHBridge&&window.webkit.messageHandlers.ZHBridge.postMessage){window.webkit.messageHandlers.ZHBridge.postMessage(JSON.stringify([action]))}else{if(window.zhbridge_messageHandlers&&window.zhbridge_messageHandlers.ZHBridge&&window.zhbridge_messageHandlers.ZHBridge.postMessage){window.zhbridge_messageHandlers.ZHBridge.postMessage(JSON.stringify([action]))}else{actionQueue.push(action);createBridge()}}};var getAndClearQueuedActions=function(){var json=JSON.stringify(actionQueue);actionQueue=[];return json};var callbackJs=function(){var data=arguments[0];if(!data){return}var callInfo=JSON.parse(data);var callbackId=callInfo[\"id\"];var status=callInfo[\"status\"];var args=callInfo[\"args\"];if(!callbackId||status==undefined||args==undefined){return}var callback=callbacks[callbackId];var success=callback[\"success\"];var fail=callback[\"fail\"];if(!callback){return}var result=undefined;if(status&&success){result=success.apply(this,args)}else{if(!status&&fail){result=fail.apply(this,args)}}return result!=undefined?JSON.stringify(result):undefined};var handlerMapper={};var callJsHandler=function(data){var callInfo=JSON.parse(data);var name=callInfo[\"name\"];var args=callInfo[\"args\"];var argsCount=callInfo[\"argsCount\"];if(!name||argsCount==undefined||argsCount!=args.length){return}var handler=handlerMapper[name];if(handler){var result=handler.apply(this,args);return result!=undefined?JSON.stringify(result):undefined}};var registerJsHandler=function(handlerName,callback){handlerMapper[handlerName]=callback};var ready=function(){var readyFunction=arguments[0];if(readyFunction){document.addEventListener(\"DOMContentLoaded\",readyFunction)}};return{getAndClearJsActions:getAndClearQueuedActions,callJsHandler:callJsHandler,callbackJs:callbackJs,registerJsHandler:registerJsHandler,callNativeHandler:callNativeHandler,ready:ready}}());var ZHBridge=window.ZHBridge||{};window.ZHBridge=ZHBridge;ZHBridge.Core=ZHBridge.Core||(function(){var callbackId=1;var callbacks={};var actionQueue=[];var createBridge=function(){var iFrame;iFrame=document.createElement(\"iframe\");iFrame.setAttribute(\"src\",\"ZHBridge://__BRIDGE_LOADED__\");iFrame.setAttribute(\"style\",\"display:none;\");iFrame.setAttribute(\"height\",\"0px\");iFrame.setAttribute(\"width\",\"0px\");iFrame.setAttribute(\"frameborder\",\"0\");document.body.appendChild(iFrame);setTimeout(function(){document.body.removeChild(iFrame)},0)};var callNativeHandler=function(){var actionName=arguments[0];var actionArgs=arguments[1]||[];var successCallback=arguments[2];var failCallback=arguments[3];var actionId=++callbackId;if(successCallback||failCallback){callbacks[actionId]={success:successCallback,fail:failCallback}}else{actionId=0}var action={id:actionId,name:actionName,args:actionArgs,argsCount:actionArgs.length};if(window.webkit&&window.webkit.messageHandlers&&window.webkit.messageHandlers.ZHBridge&&window.webkit.messageHandlers.ZHBridge.postMessage){window.webkit.messageHandlers.ZHBridge.postMessage(JSON.stringify([action]))}else{if(window.zhbridge_messageHandlers&&window.zhbridge_messageHandlers.ZHBridge&&window.zhbridge_messageHandlers.ZHBridge.postMessage){window.zhbridge_messageHandlers.ZHBridge.postMessage(JSON.stringify([action]))}else{actionQueue.push(action);createBridge()}}};var getAndClearQueuedActions=function(){var json=JSON.stringify(actionQueue);actionQueue=[];return json};var callbackJs=function(){var data=arguments[0];if(!data){return}var callInfo=JSON.parse(data);var callbackId=callInfo[\"id\"];var status=callInfo[\"status\"];var args=callInfo[\"args\"];if(!callbackId||status==undefined||args==undefined){return}var callback=callbacks[callbackId];var success=callback[\"success\"];var fail=callback[\"fail\"];if(!callback){return}var result=undefined;if(status&&success){result=success.apply(this,args)}else{if(!status&&fail){result=fail.apply(this,args)}}return result!=undefined?JSON.stringify(result):undefined};var handlerMapper={};var callJsHandler=function(data){var callInfo=JSON.parse(data);var name=callInfo[\"name\"];var args=callInfo[\"args\"];var argsCount=callInfo[\"argsCount\"];if(!name||argsCount==undefined||argsCount!=args.length){return}var handler=handlerMapper[name];if(handler){var result=handler.apply(this,args);return result!=undefined?JSON.stringify(result):undefined}};var registerJsHandler=function(handlerName,callback){handlerMapper[handlerName]=callback};var ready=function(){var readyFunction=arguments[0];if(readyFunction){document.addEventListener(\"DOMContentLoaded\",readyFunction)}};return{getAndClearJsActions:getAndClearQueuedActions,callJsHandler:callJsHandler,callbackJs:callbackJs,registerJsHandler:registerJsHandler,callNativeHandler:callNativeHandler,ready:ready}}());"
 
 protocol ZHWebViewBridgeProtocol:class {
     func zh_evaluateJavaScript(javaScriptString: String,
@@ -137,14 +138,12 @@ extension WKWebView: ZHWebViewBridgeProtocol {
     }
 }
 
-
 class ZHBridgeWKScriptMessageHandler:NSObject, WKScriptMessageHandler {
     private(set) weak var bridge:ZHWebViewBridge!
     
     init(bridge:ZHWebViewBridge) {
         super.init()
         self.bridge = bridge
-        bridge.messageHandler = self
     }
     
     func userContentController(userContentController: WKUserContentController, didReceiveScriptMessage message: WKScriptMessage) {
@@ -158,13 +157,111 @@ class ZHBridgeWKScriptMessageHandler:NSObject, WKScriptMessageHandler {
     }
 }
 
+// MARK: extention UIWewView the ability like WKWebView
+class ZHScriptMessage {
+    private(set) var name:String = ""
+    private(set) var body:AnyObject?
+    
+    init(name:String, body:AnyObject?) {
+        self.name = name
+        self.body = body
+    }
+}
+
+protocol ZHScriptMessageHandler:class {
+    func handle(message:ZHScriptMessage)
+}
+
+class ZHBridgeWBScriptMessageHandler:ZHScriptMessageHandler {
+    private(set) weak var bridge:ZHWebViewBridge!
+    
+    init(bridge:ZHWebViewBridge) {
+        self.bridge = bridge
+    }
+    
+    
+    func handle(message: ZHScriptMessage) {
+        guard let bridge = bridge else {
+            return
+        }
+        
+        if let body = message.body as? String where message.name == "ZHBridge" && !body.isEmpty{
+            dispatch_async(dispatch_get_main_queue(), {
+                bridge.handlerActions(ZHBridgeHelper.unpackActions(body))
+            })
+        }
+    }
+}
+
+@objc protocol ZHBridgeScriptMessageHandlerWrapperJSExport: JSExport {
+    func postMessage(body:AnyObject?)
+}
+class ZHBridgeScriptMessageHandlerWrapper:NSObject, ZHBridgeScriptMessageHandlerWrapperJSExport {
+    private(set) var name:String = ""
+    private(set) var handler:ZHScriptMessageHandler
+    
+    init(name:String, handler:ZHScriptMessageHandler) {
+        self.name = name
+        self.handler = handler
+    }
+    
+    func postMessage(body:AnyObject?) {
+        handler.handle(ZHScriptMessage.init(name: name, body: body))
+    }
+}
+
+class ZHWebViewContentController:NSObject {
+    private(set) weak var webView:UIWebView!
+    private(set) weak var jsContext:JSContext?
+    private(set) var messageHandlers:[String:AnyObject] = [:]
+    private var contextKVO:Int = 0
+    private let jsContextPath = "documentView.webView.mainFrame.javaScriptContext"
+    
+    init(webView:UIWebView) {
+        super.init()
+        self.webView = webView
+        webView.addObserver(self, forKeyPath: jsContextPath, options: [.Initial, .New], context: &contextKVO)
+    }
+    
+    deinit {
+        webView?.removeObserver(self, forKeyPath: jsContextPath)
+        webView = nil
+    }
+    
+    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+        guard context == &contextKVO else {
+            super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
+            return
+        }
+        
+        if keyPath == jsContextPath {
+            if let context = change?[NSKeyValueChangeNewKey] as? JSContext {
+                jsContext = context
+                updateMessgeHandler()
+            }
+        }
+    }
+    
+    private func updateMessgeHandler() {
+        jsContext?.setObject(messageHandlers, forKeyedSubscript: "zhbridge_messageHandlers")
+    }
+    
+    func addScriptMessageHandler(scriptMessageHandler: ZHScriptMessageHandler, name: String) {
+        messageHandlers[name] = ZHBridgeScriptMessageHandlerWrapper.init(name: name, handler: scriptMessageHandler)
+        updateMessgeHandler()
+    }
+    
+    func addUserScript(script:String) {
+        jsContext?.evaluateScript(script)
+    }
+}
+
 
 public class ZHWebViewBridge {
     private var handlerMapper:[String: ([AnyObject] -> (Bool, [AnyObject]?))] = [:]
-    
+
     private(set) weak var bridge:ZHWebViewBridgeProtocol?
-    private(set) var messageHandler:ZHBridgeWKScriptMessageHandler!
-    
+
     
     private init(){}
     
@@ -194,6 +291,11 @@ public class ZHWebViewBridge {
         let bridge = ZHWebViewBridge()
         bridge.bridge = webView
         
+        let messageHandler = ZHBridgeWBScriptMessageHandler.init(bridge: bridge)
+        let contentController = ZHWebViewContentController.init(webView: webView)
+        contentController.addUserScript(ZHWebViewBridgeJS)
+        contentController.addScriptMessageHandler(messageHandler, name: "ZHBridge")
+        
         return bridge
     }
     
@@ -204,7 +306,7 @@ public class ZHWebViewBridge {
      
      - returns: true can handle, false can not handle
      */
-    public final func canHandle(request: NSURLRequest) -> Bool {
+    private final func canHandle(request: NSURLRequest) -> Bool {
         let scheme = "ZHBridge"
         if let url = request.URL where url.scheme.caseInsensitiveCompare(scheme) == .OrderedSame {
             return true
@@ -213,11 +315,13 @@ public class ZHWebViewBridge {
     }
     /**
      handle a request. this method should be used in webView:shouldStartLoadWithRequest:navigationType: of UIWebViewDelegate
+     Note: this method has be deprecated
      
      - parameter request: request
      
      - returns: true request has handled by bridge
      */
+    @available(*, deprecated=0.3, message="due to usage of JavaScriptCore, no need to embed js manually")
     public func handleRequest(request: NSURLRequest) -> Bool {
         if canHandle(request) {
             bridge?.zh_unpackActions({ [weak self](actions:[ZHBridgeAction]) in
@@ -252,12 +356,12 @@ public class ZHWebViewBridge {
     public class func bridge(webView:WKWebView, injectBridgeJs:Bool = true) -> ZHWebViewBridge {
         let bridge = ZHWebViewBridge()
         bridge.bridge = webView
-        bridge.messageHandler = ZHBridgeWKScriptMessageHandler.init(bridge: bridge)
         
         if injectBridgeJs {
             webView.configuration.userContentController.addUserScript(WKUserScript.init(source: ZHWebViewBridgeJS, injectionTime: .AtDocumentStart, forMainFrameOnly: true))
         }
-        webView.configuration.userContentController.addScriptMessageHandler(bridge.messageHandler, name: "ZHBridge")
+        let messageHandler = ZHBridgeWKScriptMessageHandler.init(bridge: bridge)
+        webView.configuration.userContentController.addScriptMessageHandler(messageHandler, name: "ZHBridge")
         
         return bridge
     }

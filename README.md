@@ -10,9 +10,17 @@
 
 A lightweight bridge for WebView and native code written in Swift.
 Bridge is not a new topic, there are existing awesome projects, <a href="https://github.com/apache/Cordova-ios">Cordova(PhoneGap)</a>, <a href="https://github.com/marcuswestin/WebViewJavascriptBridge">WebViewJavascriptBridge</a> and so on.
-Cordova(PhoneGap) is a great project and cross platform, well tested. However if we do not want to develop hybrid app, it seems kind of too complex and hard to integrate to our app.
-WebViewJavascriptBridge is simple and have both iOS and android version. However it has no Swift version and does not make new feature of WKWebView.
-If you just want to integrate bridge feature to you app, WebViewBridge.Swift supplies you another choice. It's brief, simple but works well.
+- Existing projects:
+    - Cordova(PhoneGap) is a great project and cross platform, well tested. However if we do not want to develop hybrid app, it seems kind of too complex and hard to integrate to our app.
+    - WebViewJavascriptBridge is simple and have both iOS and android version.
+    - Disadvantages:
+        - both of them use iframe, not easy to use
+        - no swift version.
+- WebViewBridge.Swift Advantages:
+    - Use JavaScriptCore, deprecate iframe.
+    - Full Swift, and easy to use.
+
+If you just want to integrate bridge feature to you app, WebViewBridge.Swift supplies you another choice. It's brief, simple, optimized for ios, but works well.
 
 If your have any question, you can email me(zhangbozhb@gmail.com) or leave message.
 
@@ -30,28 +38,11 @@ If your have any question, you can email me(zhangbozhb@gmail.com) or leave messa
 
 #### Set up bridge between your webView and html
 
-**1** Inject Bridge Js to your html
-    - UIWebView: Copy bridge_code.js to your html, or refer bridge_core.js in html header.
-    - WKWebView: You do not need to do anything.
-
-**2** Set up bridge for your UIWebView/WKWebView
+**1** Set up bridge for your UIWebView/WKWebView
 ```swift
-let webView = WKWebView()
+let webView = WKWebView()/UIWebView()
 let bridge = ZHWebViewBridge.bridge(webView)
 ```
-
-**3** For WKWebView you do nothing. As for UIWebView your should call bridge.handleRequest(request) in webView:shouldStartLoadWithRequest:navigationType: of UIWebViewDelegate
-```swift
-func webView(webView: UIWebView, shouldStartLoadWithRequest request: NSURLRequest, navigationType: UIWebViewNavigationType) -> Bool {
-        return !bridge.handleRequest(request)
-    }
-```
-
-* Note:
-    - WKWebView: step 2 is enough. If you will reset your webView.configuration.userContentController,
-     your should do step 2 after that, or else bridge will not work.
-    - UIWebView: step 1, 2, 3 is required.
-
 
 ### Native JS code Interaction
 
@@ -152,33 +143,23 @@ WebView与Native桥并不是一个新的话题, 在很早以前就有实现了, 
 桥本身的技术并不困难, 实现也都大同小异, 既然已经有项目 <a href="https://github.com/apache/Cordova-ios">Cordova(PhoneGap)</a>, <a href="https://github.com/marcuswestin/WebViewJavascriptBridge">WebViewJavascriptBridge</a>, 那还有必要重复再造轮子么?
 - Cordova-ios: 本身是一个很了不起的项目, 提供了多个平台, 对于 Hybrid App而言, 是一个很好的选择;
 如果你编写的不是Hybrid App, 只是想简单的集成 bridge这个功能, Cordova 就显得过于复杂了, 不方面集成, 另外暂时也无 swift 版本的
-- WebViewJavascriptBridge: 也很不错, 同时提供了 iOS, android 版本, 集成也简单方便.
- 当然不足之处也比较明显, 一方面没有利用WKWebView的新特性,另一方面页没有提供Swift版本.
+- WebViewJavascriptBridge: 也很不错, 同时提供了 iOS, android 版本, 集成也简单方便. 有以下几点不足:
+    - UIWebView/WKWebView: 采用的旧式的 iframe 方式来实现, 集成相对麻烦
+    - 没有提供 Swift 版本
 
-WebViewBridge.Swift 的初衷并不是替换谁, 只是给你提供了另一种可能. WebViewBridge.Swift 本身使用简单, 纯 Swift实现, 利用了WKWebView的新的特性;
-如果你只是想给你的 APP 添加 bridge这个功能, WebViewBridge.Swift 是你的一个不错的选择.
+WebViewBridge.Swift 给你提供了另一种可能, 与其他相比由以下优点:
+- 采用 JavaScriptCore, 使用更简单
+- 全 Swift 实现
 
 此外: 对于此外常见的 webview点击下载图片, 实例代码中页给出了实现.
 （注意实例代码中, 下载缓存图片代码是有bug的,可以考虑使用第三方图片库, 比如 <a href="https://github.com/onevcat/Kingfisher">Kingfisher</a>）
 
 #### 前提: 为WebView和html建立桥
 
-**1** 注入桥js
-    - UIWebView: 拷贝 bridge_code.js 到 html中, 或在html 头部引用bridge_core.js
-    - WKWebView: 什么都不需要做.
-
-**2** 给 UIWebView/WKWebView 建立桥
+**1** 给 UIWebView/WKWebView 建立桥
 ```swift
 let webView = WKWebView()
 let bridge = ZHWebViewBridge.bridge(webView)
-```
-
-**3** 对于 WKWebView 不需要. 对于 UIWebView 需要在 webView 代理UIWebViewDelegate的回调函数webView:shouldStartLoadWithRequest:navigationType:
-调用 bridge.handleRequest(request)
-```swift
-func webView(webView: UIWebView, shouldStartLoadWithRequest request: NSURLRequest, navigationType: UIWebViewNavigationType) -> Bool {
-        return !bridge.handleRequest(request)
-    }
 ```
 
 * Note:

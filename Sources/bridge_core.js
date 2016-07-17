@@ -43,6 +43,10 @@ ZHBridge.Core = ZHBridge.Core || (function () {
       && window.webkit.messageHandlers.ZHBridge
       && window.webkit.messageHandlers.ZHBridge.postMessage) {
       window.webkit.messageHandlers.ZHBridge.postMessage(JSON.stringify([action]))
+    } else if (window.zhbridge_messageHandlers
+      && window.zhbridge_messageHandlers.ZHBridge
+      && window.zhbridge_messageHandlers.ZHBridge.postMessage) {
+      window.zhbridge_messageHandlers.ZHBridge.postMessage(JSON.stringify([action]))
     } else {
       actionQueue.push(action);
       createBridge();

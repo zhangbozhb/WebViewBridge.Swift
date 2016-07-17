@@ -71,11 +71,6 @@ class ZHViewController1: UIViewController, UIWebViewDelegate {
         downloadImages()
     }
     
-    func webView(webView: UIWebView, shouldStartLoadWithRequest request: NSURLRequest, navigationType: UIWebViewNavigationType) -> Bool {
-        return !bridge.handleRequest(request)
-    }
-    
-    
     func prepareResources() {
         let basePath = ZHData.instance.imageFolder
         let resources = ["place_holder.png", "bridge_core.js"]
