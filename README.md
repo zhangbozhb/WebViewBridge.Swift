@@ -148,7 +148,7 @@ WebView与Native桥并不是一个新的话题, 在很早以前就有实现了, 
     - 没有提供 Swift 版本
 
 WebViewBridge.Swift 给你提供了另一种可能, 与其他相比由以下优点:
-- 采用 JavaScriptCore, 使用更简单
+- 采用 JavaScriptCore, 弃用iframe，使用更简单
 - 全 Swift 实现
 
 此外: 对于此外常见的 webview点击下载图片, 实例代码中页给出了实现.
