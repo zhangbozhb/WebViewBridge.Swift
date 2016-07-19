@@ -9,7 +9,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "WebViewBridge.Swift"
-  s.version      = "0.4"
+  s.version      = "0.5"
   s.summary      = "A bridge for WebView and native code written in Swift"
 
   s.description  = <<-DESC

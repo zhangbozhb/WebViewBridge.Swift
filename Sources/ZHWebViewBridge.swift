@@ -10,6 +10,8 @@ import UIKit
 import WebKit
 import JavaScriptCore
 
+private let ZHBridgeName = "ZHBridge"
+
 class ZHBridgeAction {
     var actionId:Int64 = 0
     var name:String = ""
@@ -151,7 +153,7 @@ class ZHBridgeWKScriptMessageHandler:NSObject, WKScriptMessageHandler {
             return
         }
         
-        if let body = message.body as? String where message.name == "ZHBridge" && !body.isEmpty{
+        if let body = message.body as? String where message.name == ZHBridgeName && !body.isEmpty{
             bridge.handlerActions(ZHBridgeHelper.unpackActions(body))
         }
     }
@@ -185,7 +187,7 @@ class ZHBridgeWBScriptMessageHandler:ZHScriptMessageHandler {
             return
         }
         
-        if let body = message.body as? String where message.name == "ZHBridge" && !body.isEmpty{
+        if let body = message.body as? String where message.name == ZHBridgeName && !body.isEmpty{
             dispatch_async(dispatch_get_main_queue(), {
                 bridge.handlerActions(ZHBridgeHelper.unpackActions(body))
             })
@@ -211,9 +213,11 @@ class ZHBridgeScriptMessageHandlerWrapper:NSObject, ZHBridgeScriptMessageHandler
 }
 
 class ZHWebViewContentController:NSObject {
-    private(set) weak var webView:UIWebView!
+    private(set) var webView:UIWebView!
     private(set) weak var jsContext:JSContext?
     private(set) var messageHandlers:[String:AnyObject] = [:]
+    private(set) var userScripts = [String]()
+    private var bridgeJs:String?
     private var contextKVO:Int = 0
     private let jsContextPath = "documentView.webView.mainFrame.javaScriptContext"
     
@@ -235,11 +239,25 @@ class ZHWebViewContentController:NSObject {
         }
         
         if keyPath == jsContextPath {
-            if let context = change?[NSKeyValueChangeNewKey] as? JSContext {
+            if let context = change?[NSKeyValueChangeNewKey] as? JSContext where jsContext !== context {
                 jsContext = context
+                setupBridge()
                 updateMessgeHandler()
+                evaluateUserScripts()
             }
         }
+    }
+    
+    func setBridgeJs(js:String) {
+        bridgeJs = js
+        setupBridge()
+    }
+    
+    private func setupBridge() {
+        guard let script = bridgeJs else {
+            return
+        }
+        jsContext?.evaluateScript(script)
     }
     
     private func updateMessgeHandler() {
@@ -251,8 +269,30 @@ class ZHWebViewContentController:NSObject {
         updateMessgeHandler()
     }
     
+    private func evaluateUserScripts() {
+        for script in userScripts {
+            jsContext?.evaluateScript(script)
+        }
+    }
+    
     func addUserScript(script:String) {
-        jsContext?.evaluateScript(script)
+        if !Set(userScripts).contains(script) {
+            userScripts.append(script)
+            jsContext?.evaluateScript(script)
+        }
+    }
+    
+    func removeUserScript(script:String) {
+        let scripts = userScripts.flatMap { (s:String) -> String? in
+            return s != script ? s : nil
+        }
+        if scripts.count != userScripts.count {
+            userScripts = scripts
+        }
+    }
+    
+    func clearUserScript() {
+        userScripts = []
     }
 }
 
@@ -262,8 +302,23 @@ public class ZHWebViewBridge {
 
     private(set) weak var bridge:ZHWebViewBridgeProtocol?
 
-    
+    private var contentController:ZHWebViewContentController?   // UIWeview only
+
     private init(){}
+
+    deinit {
+        unbridge()
+    }
+    
+    /**
+     unbridge, if you call this method, your bridge will not work any more.
+     Note: If you bridge for UIWebView, you should call this method, to release reference of UIWebView
+     */
+    func unbridge() {
+        handlerMapper = [:]
+        contentController = nil
+        bridge = nil
+    }
     
     /**
      register a handler to handle js call
@@ -285,16 +340,43 @@ public class ZHWebViewBridge {
         bridge?.zh_callHander(handlerName, args: args, callback: callback)
     }
     
+    /**
+     adds a user script.
+     
+     - parameter source: The user script to add.
+     
+     - returns: whether script added success
+     */
+    public func addUserScriptAtDocumentStart(source:String) -> Bool {
+        if let _ = bridge as? UIWebView {
+            contentController?.addUserScript(source)
+        } else if let webview = bridge as? WKWebView {
+            webview.configuration.userContentController.addUserScript(WKUserScript.init(source: source, injectionTime: .AtDocumentStart, forMainFrameOnly: true))
+        }
+        return true
+    }
     
     // MARK: for UIWebView
-    public class func bridge(webView:UIWebView) -> ZHWebViewBridge {
+    /**
+     set up bridge for webview
+     Note: bridge will hold strong reference of UIWebView, you should call unbridge manually
+     
+     - parameter webView:        webview you want to setup
+     - parameter injectBridgeJs: if set to false, your should manual copy bridge js to you html, or refer bridge js in you html header
+     
+     - returns: bridge
+     */
+    public class func bridge(webView:UIWebView, injectBridgeJs:Bool = true) -> ZHWebViewBridge {
         let bridge = ZHWebViewBridge()
         bridge.bridge = webView
         
         let messageHandler = ZHBridgeWBScriptMessageHandler.init(bridge: bridge)
         let contentController = ZHWebViewContentController.init(webView: webView)
-        contentController.addUserScript(ZHWebViewBridgeJS)
-        contentController.addScriptMessageHandler(messageHandler, name: "ZHBridge")
+        if injectBridgeJs {
+            contentController.setBridgeJs(ZHWebViewBridgeJS)
+        }
+        contentController.addScriptMessageHandler(messageHandler, name: ZHBridgeName)
+        bridge.contentController = contentController
         
         return bridge
     }
@@ -307,7 +389,7 @@ public class ZHWebViewBridge {
      - returns: true can handle, false can not handle
      */
     private final func canHandle(request: NSURLRequest) -> Bool {
-        let scheme = "ZHBridge"
+        let scheme = ZHBridgeName
         if let url = request.URL where url.scheme.caseInsensitiveCompare(scheme) == .OrderedSame {
             return true
         }
@@ -361,7 +443,7 @@ public class ZHWebViewBridge {
             webView.configuration.userContentController.addUserScript(WKUserScript.init(source: ZHWebViewBridgeJS, injectionTime: .AtDocumentStart, forMainFrameOnly: true))
         }
         let messageHandler = ZHBridgeWKScriptMessageHandler.init(bridge: bridge)
-        webView.configuration.userContentController.addScriptMessageHandler(messageHandler, name: "ZHBridge")
+        webView.configuration.userContentController.addScriptMessageHandler(messageHandler, name: ZHBridgeName)
         
         return bridge
     }

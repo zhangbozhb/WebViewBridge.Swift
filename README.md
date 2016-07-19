@@ -100,6 +100,12 @@ ZHBridge.Core.callNativeHandler(
 * Note: ZHBridge.Core.callNativeHandler(handlerName, argArrayPassToNativeHandler, successCallback, failCallback)
 
 
+#### 3, Others
+bridge support add user script add document start
+```swift
+bridge.addUserScriptAtDocumentStart("your script")
+```
+
 ## Installation
 
 ### CocoaPods
@@ -223,3 +229,8 @@ ZHBridge.Core.callNativeHandler(
 
 * 说明: ZHBridge.Core.callNativeHandler(handlerName, 传递给原生handler的参数数组, 成功回调, 失败回调)
 
+#### 3, 其他
+桥支持在document开始的时候, 执行自己的js代码
+```swift
+bridge.addUserScriptAtDocumentStart("your script")
+```
