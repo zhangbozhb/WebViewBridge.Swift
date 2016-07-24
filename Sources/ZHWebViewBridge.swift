@@ -216,8 +216,7 @@ class ZHWebViewContentController:NSObject {
     private(set) var webView:UIWebView!
     private(set) weak var jsContext:JSContext?
     private(set) var messageHandlers:[String:AnyObject] = [:]
-    private(set) var userScripts = [String]()
-    private var bridgeJs:String?
+    private(set) var pluginScripts = [String]()
     private var contextKVO:Int = 0
     private let jsContextPath = "documentView.webView.mainFrame.javaScriptContext"
     
@@ -241,23 +240,10 @@ class ZHWebViewContentController:NSObject {
         if keyPath == jsContextPath {
             if let context = change?[NSKeyValueChangeNewKey] as? JSContext where jsContext !== context {
                 jsContext = context
-                setupBridge()
+                setupUserPlugins()
                 updateMessgeHandler()
-                evaluateUserScripts()
             }
         }
-    }
-    
-    func setBridgeJs(js:String) {
-        bridgeJs = js
-        setupBridge()
-    }
-    
-    private func setupBridge() {
-        guard let script = bridgeJs else {
-            return
-        }
-        jsContext?.evaluateScript(script)
     }
     
     private func updateMessgeHandler() {
@@ -269,30 +255,30 @@ class ZHWebViewContentController:NSObject {
         updateMessgeHandler()
     }
     
-    private func evaluateUserScripts() {
-        for script in userScripts {
+    private func setupUserPlugins() {
+        for script in pluginScripts {
             jsContext?.evaluateScript(script)
         }
     }
     
-    func addUserScript(script:String) {
-        if !Set(userScripts).contains(script) {
-            userScripts.append(script)
+    func addUserPlugin(script:String) {
+        if !Set(pluginScripts).contains(script) {
+            pluginScripts.append(script)
             jsContext?.evaluateScript(script)
         }
     }
     
-    func removeUserScript(script:String) {
-        let scripts = userScripts.flatMap { (s:String) -> String? in
+    func removeUserPlugin(script:String) {
+        let scripts = pluginScripts.flatMap { (s:String) -> String? in
             return s != script ? s : nil
         }
-        if scripts.count != userScripts.count {
-            userScripts = scripts
+        if scripts.count != pluginScripts.count {
+            pluginScripts = scripts
         }
     }
     
-    func clearUserScript() {
-        userScripts = []
+    func clearUserPlugin() {
+        pluginScripts = []
     }
 }
 
@@ -307,14 +293,14 @@ public class ZHWebViewBridge {
     private init(){}
 
     deinit {
-        unbridge()
+        teardown()
     }
     
     /**
-     unbridge, if you call this method, your bridge will not work any more.
+     tear down your bridge, if you call this method, your bridge will not work any more.
      Note: If you bridge for UIWebView, you should call this method, to release reference of UIWebView
      */
-    func unbridge() {
+    public func teardown() {
         handlerMapper = [:]
         contentController = nil
         bridge = nil
@@ -343,13 +329,13 @@ public class ZHWebViewBridge {
     /**
      adds a user script.
      
-     - parameter source: The user script to add.
+     - parameter source: The user plugin script to add.
      
-     - returns: whether script added success
+     - returns: whether plugin added success
      */
-    public func addUserScriptAtDocumentStart(source:String) -> Bool {
+    public func addUserPluginScript(source:String) -> Bool {
         if let _ = bridge as? UIWebView {
-            contentController?.addUserScript(source)
+            contentController?.addUserPlugin(source)
         } else if let webview = bridge as? WKWebView {
             webview.configuration.userContentController.addUserScript(WKUserScript.init(source: source, injectionTime: .AtDocumentStart, forMainFrameOnly: true))
         }
@@ -373,7 +359,7 @@ public class ZHWebViewBridge {
         let messageHandler = ZHBridgeWBScriptMessageHandler.init(bridge: bridge)
         let contentController = ZHWebViewContentController.init(webView: webView)
         if injectBridgeJs {
-            contentController.setBridgeJs(ZHWebViewBridgeJS)
+            contentController.addUserPlugin(ZHWebViewBridgeJS)
         }
         contentController.addScriptMessageHandler(messageHandler, name: ZHBridgeName)
         bridge.contentController = contentController

@@ -43,6 +43,7 @@ If your have any question, you can email me(zhangbozhb@gmail.com) or leave messa
 let webView = WKWebView()/UIWebView()
 let bridge = ZHWebViewBridge.bridge(webView)
 ```
+* Note: if you set bridge for UIWebView, you should manually call bridge.teardown() to release strong reference to your UIWebView
 
 ### Native JS code Interaction
 
@@ -101,10 +102,12 @@ ZHBridge.Core.callNativeHandler(
 
 
 #### 3, Others
-bridge support add user script add document start
+**a**, add user plugin script
 ```swift
-bridge.addUserScriptAtDocumentStart("your script")
+bridge.addUserPluginScript("your script")
 ```
+
+
 
 ## Installation
 
@@ -168,10 +171,7 @@ let webView = WKWebView()
 let bridge = ZHWebViewBridge.bridge(webView)
 ```
 
-* Note:
-    - WKWebView: 步骤2完全足够. 如果需要重置 webView.configuration.userContentController,
-     你应该在重置后后进行步骤2, 不然桥无法正常工作
-    - UIWebView: 步骤1, 2, 3都是需要的
+* Note: 如果是给 UIWebView 添加桥服务, 那么你需要主动调用 bridge.teardown() 用于释放对你的 UIWebView的强引用
 
 ### 原生代码与 JS 的相互交互
 
@@ -230,7 +230,7 @@ ZHBridge.Core.callNativeHandler(
 * 说明: ZHBridge.Core.callNativeHandler(handlerName, 传递给原生handler的参数数组, 成功回调, 失败回调)
 
 #### 3, 其他
-桥支持在document开始的时候, 执行自己的js代码
+**a**, 添加其他的插件代码
 ```swift
-bridge.addUserScriptAtDocumentStart("your script")
+bridge.addUserPluginScript("your script")
 ```
