@@ -283,10 +283,8 @@ class ZHWebViewContentController:NSObject {
                 self?.updateJsContext(context)
             }
         }
+        updateWebViewDelegate(webView.delegate)
         webView.addObserver(self, forKeyPath: delegatePath, options: [.Initial, .New], context: &contextKVO)
-        if let d = webView.delegate {
-            updateDelegate(d)
-        }
     }
     
     deinit {
@@ -306,15 +304,16 @@ class ZHWebViewContentController:NSObject {
                 updateJsContext(context)
             }
         } else if keyPath == delegatePath {
-            if let d = change?[NSKeyValueChangeNewKey] as? UIWebViewDelegate where delegate !== d && d !== delegate.delegate {
-                updateDelegate(d)
-            }
+            updateWebViewDelegate(change?[NSKeyValueChangeNewKey] as? UIWebViewDelegate)
         }
     }
     
-    private func updateDelegate(delegate:UIWebViewDelegate) {
-        if delegateUnderProxy {
+    private func updateWebViewDelegate(delegate:UIWebViewDelegate?) {
+        if delegate !== self.delegate {
             self.delegate.delegate = delegate
+        }
+
+        if delegateUnderProxy && webView.delegate !== self.delegate {
             webView.delegate = self.delegate
         }
     }
