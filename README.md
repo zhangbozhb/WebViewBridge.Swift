@@ -10,13 +10,15 @@
 
 A lightweight bridge for WebView and native code written in Swift.
 Bridge is not a new topic, there are existing awesome projects, <a href="https://github.com/apache/Cordova-ios">Cordova(PhoneGap)</a>, <a href="https://github.com/marcuswestin/WebViewJavascriptBridge">WebViewJavascriptBridge</a> and so on.
+Honestly speaking, WebViewBridge.Swift provides you another choice, but far from satisfying. 
+
 - Existing projects:
     - Cordova(PhoneGap) is a great project and cross platform, well tested. However if we do not want to develop hybrid app, it seems kind of too complex and hard to integrate to our app.
     - WebViewJavascriptBridge is simple and have both iOS and android version.
     - Disadvantages:
         - both of them use iframe, not easy to use
         - no swift version.
-- WebViewBridge.Swift Advantages:
+- WebViewBridge.Swift:
     - Use JavaScriptCore, deprecate iframe(not all, may use iframe before webViewDidFinishLoad).
     - Full Swift, and easy to use.
 
