@@ -106,9 +106,9 @@ ZHBridge.Core.callNativeHandler(
 
 
 #### 3, Others
-**a**, add user plugin script
+**a**, add user plugin script(UIWebView not support)
 ```swift
-bridge.addUserPluginScript("your script")
+bridge.addUserPluginScript("your script")   // WKWebView only
 ```
 
 
@@ -236,7 +236,7 @@ ZHBridge.Core.callNativeHandler(
 * 说明: ZHBridge.Core.callNativeHandler(handlerName, 传递给原生handler的参数数组, 成功回调, 失败回调)
 
 #### 3, 其他
-**a**, 添加其他的插件代码
+**a**, 添加其他的插件代码(UIWebView 不支持)
 ```swift
-bridge.addUserPluginScript("your script")
+bridge.addUserPluginScript("your script")   // WKWebView only
 ```
