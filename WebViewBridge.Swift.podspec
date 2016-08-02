@@ -10,17 +10,14 @@ Pod::Spec.new do |s|
 
   s.name         = "WebViewBridge.Swift"
   s.version      = "0.5"
-  s.summary      = "A bridge for WebView and native code written in Swift"
+  s.summary      = "A bridge for WebView(UIWebView, WKWebView), using JavaScriptCore , handles communications between native(Swift) and js"
 
   s.description  = <<-DESC
-                    A bridge for WebView and native code written in Swift, use JavaScriptCore(not iframe)
+                    A bridge for WebView(UIWebView, WKWebView), using JavaScriptCore , handles communications between native(Swift) and js
                    DESC
 
   s.homepage     = "https://github.com/zhangbozhb/WebViewBridge.Swift"
   s.screenshots  = "https://github.com/zhangbozhb/WebViewBridge.Swift/blob/master/screenshots_1.gif"
-
-
-  s.license      = { :type => "MIT", :file => "LICENSE" }
 
   s.author             = { "travel" => "zhangbozhb@gmail.com" }
   s.social_media_url   = "http://twitter.com/travel_zh"

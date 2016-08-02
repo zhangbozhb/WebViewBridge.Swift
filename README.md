@@ -17,7 +17,7 @@ Bridge is not a new topic, there are existing awesome projects, <a href="https:/
         - both of them use iframe, not easy to use
         - no swift version.
 - WebViewBridge.Swift Advantages:
-    - Use JavaScriptCore, deprecate iframe.
+    - Use JavaScriptCore, deprecate iframe(not all, may use iframe before webViewDidFinishLoad).
     - Full Swift, and easy to use.
 
 If you just want to integrate bridge feature to you app, WebViewBridge.Swift supplies you another choice. It's brief, simple, optimized for ios, but works well.
@@ -43,7 +43,11 @@ If your have any question, you can email me(zhangbozhb@gmail.com) or leave messa
 let webView = WKWebView()/UIWebView()
 let bridge = ZHWebViewBridge.bridge(webView)
 ```
-* Note: if you set bridge for UIWebView, you should manually call bridge.teardown() to release strong reference to your UIWebView
+* Note: if you set bridge for UIWebView
+* Note: if you set bridge for UIWebView
+    * copy bridge.js to your html file
+    * manually call bridge.teardown() to release strong reference to your UIWebView
+
 
 ### Native JS code Interaction
 
@@ -157,7 +161,7 @@ WebView与Native桥并不是一个新的话题, 在很早以前就有实现了, 
     - 没有提供 Swift 版本
 
 WebViewBridge.Swift 给你提供了另一种可能, 与其他相比由以下优点:
-- 采用 JavaScriptCore, 弃用iframe，使用更简单
+- 采用 JavaScriptCore, 弃用iframe，使用更简单 (并非完全弃用iframe, 在webViewDidFinishLoad之前可能仍会使用iframe)
 - 全 Swift 实现
 
 此外: 对于此外常见的 webview点击下载图片, 实例代码中页给出了实现.
@@ -171,7 +175,9 @@ let webView = WKWebView()
 let bridge = ZHWebViewBridge.bridge(webView)
 ```
 
-* Note: 如果是给 UIWebView 添加桥服务, 那么你需要主动调用 bridge.teardown() 用于释放对你的 UIWebView的强引用
+* Note: 对于 UIWebView 需要注意一下事情
+    * 拷贝 bridge.js 代码到你的html文件中
+    * 需要主动调用 bridge.teardown() 用于释放对你的 UIWebView的强引用
 
 ### 原生代码与 JS 的相互交互
 

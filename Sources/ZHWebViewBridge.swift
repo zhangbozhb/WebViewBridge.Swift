@@ -3,8 +3,29 @@
 //  WebViewBridge.Swift
 //
 //  Created by travel on 16/6/19.
-//  Copyright © 2016年 travel. All rights reserved.
 //
+//	OS X 10.10+ and iOS 8.0+
+//	Only use with ARC
+//
+//	The MIT License (MIT)
+//	Copyright © 2016 travel.
+//
+//	Permission is hereby granted, free of charge, to any person obtaining a copy of
+//	this software and associated documentation files (the "Software"), to deal in
+//	the Software without restriction, including without limitation the rights to
+//	use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+//	the Software, and to permit persons to whom the Software is furnished to do so,
+//	subject to the following conditions:
+//
+//	The above copyright notice and this permission notice shall be included in all
+//	copies or substantial portions of the Software.
+//
+//	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+//	FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+//	COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+//	IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+//	CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import UIKit
 import WebKit
@@ -212,22 +233,65 @@ class ZHBridgeScriptMessageHandlerWrapper:NSObject, ZHBridgeScriptMessageHandler
     }
 }
 
+class ZHWebViewDelegate:NSObject, UIWebViewDelegate {
+    private weak var delegate:UIWebViewDelegate?
+    private var webViewDidFinishLoadBlock:(UIWebView -> Void)?
+    var webViewShouldStartLoadWithRequestBlock:((UIWebView, NSURLRequest) -> Bool)?
+    
+    func webView(webView: UIWebView, shouldStartLoadWithRequest request: NSURLRequest, navigationType: UIWebViewNavigationType) -> Bool {
+        return  webViewShouldStartLoadWithRequestBlock?(webView, request) ?? (delegate?.webView?(webView, shouldStartLoadWithRequest: request, navigationType: navigationType) ?? true)
+    }
+    
+    func webViewDidStartLoad(webView: UIWebView) {
+        delegate?.webViewDidStartLoad?(webView)
+    }
+    
+    func webViewDidFinishLoad(webView: UIWebView) {
+        webViewDidFinishLoadBlock?(webView)
+        delegate?.webViewDidFinishLoad?(webView)
+    }
+    
+    func webView(webView: UIWebView, didFailLoadWithError error: NSError?) {
+        delegate?.webView?(webView, didFailLoadWithError: error)
+    }
+}
+
 class ZHWebViewContentController:NSObject {
     private(set) var webView:UIWebView!
+    private(set) var delegateUnderProxy = false
     private(set) weak var jsContext:JSContext?
+    private let delegate = ZHWebViewDelegate()
     private(set) var messageHandlers:[String:AnyObject] = [:]
     private(set) var pluginScripts = [String]()
     private var contextKVO:Int = 0
     private let jsContextPath = "documentView.webView.mainFrame.javaScriptContext"
+    private let delegatePath = "delegate"
     
-    init(webView:UIWebView) {
+    
+    init(webView:UIWebView, proxyDelegate:Bool = true) {
         super.init()
+        
+        delegateUnderProxy = proxyDelegate
+        
+        let jsContextPath = self.jsContextPath
         self.webView = webView
+        jsContext = webView.valueForKeyPath(jsContextPath) as? JSContext
         webView.addObserver(self, forKeyPath: jsContextPath, options: [.Initial, .New], context: &contextKVO)
+        
+        delegate.webViewDidFinishLoadBlock = { [weak self] (wb:UIWebView) in
+            if let context = webView.valueForKeyPath(jsContextPath) as? JSContext where self?.jsContext !== context {
+                self?.updateJsContext(context)
+            }
+        }
+        webView.addObserver(self, forKeyPath: delegatePath, options: [.Initial, .New], context: &contextKVO)
+        if let d = webView.delegate {
+            updateDelegate(d)
+        }
     }
     
     deinit {
         webView?.removeObserver(self, forKeyPath: jsContextPath)
+        webView?.removeObserver(self, forKeyPath: delegatePath)
         webView = nil
     }
     
@@ -239,11 +303,26 @@ class ZHWebViewContentController:NSObject {
         
         if keyPath == jsContextPath {
             if let context = change?[NSKeyValueChangeNewKey] as? JSContext where jsContext !== context {
-                jsContext = context
-                setupUserPlugins()
-                updateMessgeHandler()
+                updateJsContext(context)
+            }
+        } else if keyPath == delegatePath {
+            if let d = change?[NSKeyValueChangeNewKey] as? UIWebViewDelegate where delegate !== d && d !== delegate.delegate {
+                updateDelegate(d)
             }
         }
+    }
+    
+    private func updateDelegate(delegate:UIWebViewDelegate) {
+        if delegateUnderProxy {
+            self.delegate.delegate = delegate
+            webView.delegate = self.delegate
+        }
+    }
+    
+    private func updateJsContext(context:JSContext) {
+        jsContext = context
+        setupUserPlugins()
+        updateMessgeHandler()
     }
     
     private func updateMessgeHandler() {
@@ -282,7 +361,6 @@ class ZHWebViewContentController:NSObject {
     }
 }
 
-
 public class ZHWebViewBridge {
     private var handlerMapper:[String: ([AnyObject] -> (Bool, [AnyObject]?))] = [:]
 
@@ -294,6 +372,11 @@ public class ZHWebViewBridge {
 
     deinit {
         teardown()
+    }
+    
+    /// initial delegate of UIWebView
+    public var delegate:UIWebViewDelegate? {
+        return contentController?.delegate.delegate
     }
     
     /**
@@ -328,6 +411,7 @@ public class ZHWebViewBridge {
     
     /**
      adds a user script.
+     Note:  If bridge for UIWebView, you shoul avoid to use this method, in case it will not work as you aspect
      
      - parameter source: The user plugin script to add.
      
@@ -345,23 +429,26 @@ public class ZHWebViewBridge {
     // MARK: for UIWebView
     /**
      set up bridge for webview
-     Note: bridge will hold strong reference of UIWebView, you should call unbridge manually
+     Note:  1, your should copy bridge js to your html file
+            2, bridge will hold strong reference of UIWebView, you should call unbridge manually
+            3, bridge will replace webView.delegate, if you want to access the origin delegate, use bridge.delegate instead
      
      - parameter webView:        webview you want to setup
-     - parameter injectBridgeJs: if set to false, your should manual copy bridge js to you html, or refer bridge js in you html header
+     - parameter proxyDelegate: if set to false, your should manual call bridge.handleRequest(:) in method webView:shouldStartLoadWithRequest:navigationType: of UIWebViewDelegate
      
      - returns: bridge
      */
-    public class func bridge(webView:UIWebView, injectBridgeJs:Bool = true) -> ZHWebViewBridge {
+    public class func bridge(webView:UIWebView, proxyDelegate:Bool = true) -> ZHWebViewBridge {
         let bridge = ZHWebViewBridge()
         bridge.bridge = webView
         
         let messageHandler = ZHBridgeWBScriptMessageHandler.init(bridge: bridge)
-        let contentController = ZHWebViewContentController.init(webView: webView)
-        if injectBridgeJs {
-            contentController.addUserPlugin(ZHWebViewBridgeJS)
-        }
+        let contentController = ZHWebViewContentController.init(webView: webView, proxyDelegate: proxyDelegate)
+        contentController.addUserPlugin(ZHWebViewBridgeJS)
         contentController.addScriptMessageHandler(messageHandler, name: ZHBridgeName)
+        contentController.delegate.webViewShouldStartLoadWithRequestBlock = { (wb:UIWebView, request:NSURLRequest) -> Bool in
+            return !bridge.handleRequest(request)
+        }
         bridge.contentController = contentController
         
         return bridge
@@ -389,7 +476,6 @@ public class ZHWebViewBridge {
      
      - returns: true request has handled by bridge
      */
-    @available(*, deprecated=0.3, message="due to usage of JavaScriptCore, no need to embed js manually")
     public func handleRequest(request: NSURLRequest) -> Bool {
         if canHandle(request) {
             bridge?.zh_unpackActions({ [weak self](actions:[ZHBridgeAction]) in
