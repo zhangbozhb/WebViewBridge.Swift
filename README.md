@@ -46,7 +46,6 @@ let webView = WKWebView()/UIWebView()
 let bridge = ZHWebViewBridge.bridge(webView)
 ```
 * Note: if you set bridge for UIWebView
-* Note: if you set bridge for UIWebView
     * copy bridge.js to your html file
     * manually call bridge.teardown() to release strong reference to your UIWebView
 
