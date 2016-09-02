@@ -124,7 +124,7 @@ bridge.addUserPluginScript("your script")   // WKWebView only
 $ gem install cocoapods
 ```
 
-To integrate ChameleonSwift into your Xcode project using CocoaPods, specify it in your `Podfile`:
+To integrate WebViewBridge.Swift into your Xcode project using CocoaPods, specify it in your `Podfile`:
 
 ``` ruby
 source 'https://github.com/CocoaPods/Specs.git'
