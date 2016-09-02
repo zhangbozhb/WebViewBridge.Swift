@@ -118,12 +118,6 @@ bridge.addUserPluginScript("your script")   // WKWebView only
 
 ### CocoaPods
 
-[CocoaPods](http://cocoapods.org) is a dependency manager for Cocoa projects. You can install it with the following command:
-
-``` bash
-$ gem install cocoapods
-```
-
 To integrate WebViewBridge.Swift into your Xcode project using CocoaPods, specify it in your `Podfile`:
 
 ``` ruby
@@ -133,15 +127,6 @@ use_frameworks!
 
 pod 'WebViewBridge.Swift'
 ```
-
-Then, run the following command:
-
-``` bash
-$ pod install
-```
-
-You should open the `{Project}.xcworkspace` instead of the `{Project}.xcodeproj` after you installed anything from CocoaPods.
-
 
 ### Carthage
 ```bash
