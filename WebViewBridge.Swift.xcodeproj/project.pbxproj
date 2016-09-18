@@ -11,8 +11,6 @@
 		ED90A3361D1661DA003FA3A5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ED90A3341D1661DA003FA3A5 /* Main.storyboard */; };
 		ED90A3381D1661DA003FA3A5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ED90A3371D1661DA003FA3A5 /* Assets.xcassets */; };
 		ED90A33B1D1661DA003FA3A5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ED90A3391D1661DA003FA3A5 /* LaunchScreen.storyboard */; };
-		ED90A3461D1661DA003FA3A5 /* WebViewBridge_SwiftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED90A3451D1661DA003FA3A5 /* WebViewBridge_SwiftTests.swift */; };
-		ED90A3511D1661DA003FA3A5 /* WebViewBridge_SwiftUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED90A3501D1661DA003FA3A5 /* WebViewBridge_SwiftUITests.swift */; };
 		ED90A3671D167DBE003FA3A5 /* ZHWebViewBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED90A3661D167DBE003FA3A5 /* ZHWebViewBridge.swift */; };
 		EDF09E4A1D17B55D00A5583D /* ZHViewController1.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF09E491D17B55D00A5583D /* ZHViewController1.swift */; };
 		EDF09E4E1D17B5D000A5583D /* ZHViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF09E4D1D17B5D000A5583D /* ZHViewController2.swift */; };
@@ -22,23 +20,6 @@
 		EDF09E5A1D180D3000A5583D /* bridge.js in Resources */ = {isa = PBXBuildFile; fileRef = EDF09E591D180D3000A5583D /* bridge.js */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		ED90A3421D1661DA003FA3A5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = ED90A3251D1661DA003FA3A5 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = ED90A32C1D1661DA003FA3A5;
-			remoteInfo = WebViewBridge.Swift;
-		};
-		ED90A34D1D1661DA003FA3A5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = ED90A3251D1661DA003FA3A5 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = ED90A32C1D1661DA003FA3A5;
-			remoteInfo = WebViewBridge.Swift;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
 		ED90A32D1D1661DA003FA3A5 /* WebViewBridge.Swift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WebViewBridge.Swift.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED90A3301D1661DA003FA3A5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -46,10 +27,8 @@
 		ED90A3371D1661DA003FA3A5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		ED90A33A1D1661DA003FA3A5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		ED90A33C1D1661DA003FA3A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		ED90A3411D1661DA003FA3A5 /* WebViewBridge.SwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WebViewBridge.SwiftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED90A3451D1661DA003FA3A5 /* WebViewBridge_SwiftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewBridge_SwiftTests.swift; sourceTree = "<group>"; };
 		ED90A3471D1661DA003FA3A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		ED90A34C1D1661DA003FA3A5 /* WebViewBridge.SwiftUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WebViewBridge.SwiftUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED90A3501D1661DA003FA3A5 /* WebViewBridge_SwiftUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewBridge_SwiftUITests.swift; sourceTree = "<group>"; };
 		ED90A3521D1661DA003FA3A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		ED90A3661D167DBE003FA3A5 /* ZHWebViewBridge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZHWebViewBridge.swift; sourceTree = "<group>"; };
@@ -63,20 +42,6 @@
 
 /* Begin PBXFrameworksBuildPhase section */
 		ED90A32A1D1661DA003FA3A5 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		ED90A33E1D1661DA003FA3A5 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		ED90A3491D1661DA003FA3A5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -101,8 +66,6 @@
 			isa = PBXGroup;
 			children = (
 				ED90A32D1D1661DA003FA3A5 /* WebViewBridge.Swift.app */,
-				ED90A3411D1661DA003FA3A5 /* WebViewBridge.SwiftTests.xctest */,
-				ED90A34C1D1661DA003FA3A5 /* WebViewBridge.SwiftUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -171,42 +134,6 @@
 			productReference = ED90A32D1D1661DA003FA3A5 /* WebViewBridge.Swift.app */;
 			productType = "com.apple.product-type.application";
 		};
-		ED90A3401D1661DA003FA3A5 /* WebViewBridge.SwiftTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = ED90A3581D1661DA003FA3A5 /* Build configuration list for PBXNativeTarget "WebViewBridge.SwiftTests" */;
-			buildPhases = (
-				ED90A33D1D1661DA003FA3A5 /* Sources */,
-				ED90A33E1D1661DA003FA3A5 /* Frameworks */,
-				ED90A33F1D1661DA003FA3A5 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				ED90A3431D1661DA003FA3A5 /* PBXTargetDependency */,
-			);
-			name = WebViewBridge.SwiftTests;
-			productName = WebViewBridge.SwiftTests;
-			productReference = ED90A3411D1661DA003FA3A5 /* WebViewBridge.SwiftTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		ED90A34B1D1661DA003FA3A5 /* WebViewBridge.SwiftUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = ED90A35B1D1661DA003FA3A5 /* Build configuration list for PBXNativeTarget "WebViewBridge.SwiftUITests" */;
-			buildPhases = (
-				ED90A3481D1661DA003FA3A5 /* Sources */,
-				ED90A3491D1661DA003FA3A5 /* Frameworks */,
-				ED90A34A1D1661DA003FA3A5 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				ED90A34E1D1661DA003FA3A5 /* PBXTargetDependency */,
-			);
-			name = WebViewBridge.SwiftUITests;
-			productName = WebViewBridge.SwiftUITests;
-			productReference = ED90A34C1D1661DA003FA3A5 /* WebViewBridge.SwiftUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -219,14 +146,8 @@
 				TargetAttributes = {
 					ED90A32C1D1661DA003FA3A5 = {
 						CreatedOnToolsVersion = 7.3.1;
-					};
-					ED90A3401D1661DA003FA3A5 = {
-						CreatedOnToolsVersion = 7.3.1;
-						TestTargetID = ED90A32C1D1661DA003FA3A5;
-					};
-					ED90A34B1D1661DA003FA3A5 = {
-						CreatedOnToolsVersion = 7.3.1;
-						TestTargetID = ED90A32C1D1661DA003FA3A5;
+						DevelopmentTeam = HNF3479B3Z;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -244,8 +165,6 @@
 			projectRoot = "";
 			targets = (
 				ED90A32C1D1661DA003FA3A5 /* WebViewBridge.Swift */,
-				ED90A3401D1661DA003FA3A5 /* WebViewBridge.SwiftTests */,
-				ED90A34B1D1661DA003FA3A5 /* WebViewBridge.SwiftUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -264,20 +183,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		ED90A33F1D1661DA003FA3A5 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		ED90A34A1D1661DA003FA3A5 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -293,36 +198,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		ED90A33D1D1661DA003FA3A5 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				ED90A3461D1661DA003FA3A5 /* WebViewBridge_SwiftTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		ED90A3481D1661DA003FA3A5 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				ED90A3511D1661DA003FA3A5 /* WebViewBridge_SwiftUITests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		ED90A3431D1661DA003FA3A5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = ED90A32C1D1661DA003FA3A5 /* WebViewBridge.Swift */;
-			targetProxy = ED90A3421D1661DA003FA3A5 /* PBXContainerItemProxy */;
-		};
-		ED90A34E1D1661DA003FA3A5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = ED90A32C1D1661DA003FA3A5 /* WebViewBridge.Swift */;
-			targetProxy = ED90A34D1D1661DA003FA3A5 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		ED90A3341D1661DA003FA3A5 /* Main.storyboard */ = {
@@ -433,11 +309,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = HNF3479B3Z;
 				INFOPLIST_FILE = WebViewBridge.Swift/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.undefined.WebViewBridge-Swift";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 2.3;
 			};
 			name = Debug;
 		};
@@ -445,57 +323,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = HNF3479B3Z;
 				INFOPLIST_FILE = WebViewBridge.Swift/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.undefined.WebViewBridge-Swift";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Release;
-		};
-		ED90A3591D1661DA003FA3A5 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				INFOPLIST_FILE = WebViewBridge.SwiftTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.undefined.WebViewBridge-SwiftTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WebViewBridge.Swift.app/WebViewBridge.Swift";
-			};
-			name = Debug;
-		};
-		ED90A35A1D1661DA003FA3A5 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				INFOPLIST_FILE = WebViewBridge.SwiftTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.undefined.WebViewBridge-SwiftTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WebViewBridge.Swift.app/WebViewBridge.Swift";
-			};
-			name = Release;
-		};
-		ED90A35C1D1661DA003FA3A5 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = WebViewBridge.SwiftUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.undefined.WebViewBridge-SwiftUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_TARGET_NAME = WebViewBridge.Swift;
-			};
-			name = Debug;
-		};
-		ED90A35D1D1661DA003FA3A5 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = WebViewBridge.SwiftUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.undefined.WebViewBridge-SwiftUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_TARGET_NAME = WebViewBridge.Swift;
+				SWIFT_VERSION = 2.3;
 			};
 			name = Release;
 		};
@@ -516,24 +350,6 @@
 			buildConfigurations = (
 				ED90A3561D1661DA003FA3A5 /* Debug */,
 				ED90A3571D1661DA003FA3A5 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		ED90A3581D1661DA003FA3A5 /* Build configuration list for PBXNativeTarget "WebViewBridge.SwiftTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				ED90A3591D1661DA003FA3A5 /* Debug */,
-				ED90A35A1D1661DA003FA3A5 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		ED90A35B1D1661DA003FA3A5 /* Build configuration list for PBXNativeTarget "WebViewBridge.SwiftUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				ED90A35C1D1661DA003FA3A5 /* Debug */,
-				ED90A35D1D1661DA003FA3A5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

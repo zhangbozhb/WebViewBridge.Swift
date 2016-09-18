@@ -34,11 +34,11 @@ import JavaScriptCore
 private let ZHBridgeName = "ZHBridge"
 
 class ZHBridgeAction {
-    var actionId:Int64 = 0
+    var actionId:Int = 0
     var name:String = ""
     var args:[AnyObject] = []
     
-    init(actionId:Int64, name:String, args:[AnyObject]) {
+    init(actionId:Int, name:String, args:[AnyObject]) {
         self.actionId = actionId
         self.name = name
         self.args = args
@@ -50,15 +50,15 @@ class ZHBridgeAction {
 }
 
 class ZHBridgeActionResult {
-    var actionId:Int64 = 0
+    var actionId:Int = 0
     var status = true
     var result:AnyObject?
     
-    init(actionId:Int64) {
+    init(actionId:Int) {
         self.actionId = actionId
     }
     
-    init(actionId:Int64, status:Bool, result:AnyObject?) {
+    init(actionId:Int, status:Bool, result:AnyObject?) {
         self.actionId = actionId
         self.status = status
         self.result = result
@@ -66,7 +66,7 @@ class ZHBridgeActionResult {
 }
 
 public class ZHBridgeHelper {
-    public final class func serializeData(data:AnyObject) ->String {
+    public final class func serializeData(data:AnyObject) -> String {
         if let json = try? NSJSONSerialization.dataWithJSONObject(data, options: NSJSONWritingOptions.init(rawValue: 0)) {
             return NSString.init(data: json, encoding: NSUTF8StringEncoding) as! String
         }
@@ -85,7 +85,7 @@ public class ZHBridgeHelper {
         if let infoString = obj as? String, infos = self.deserializeData(infoString) as? [[String: AnyObject]] {
             for info in infos {
                 if let actionId = info["id"] as? NSNumber, name = info["name"] as? String, args = info["args"] as? [AnyObject] {
-                    let action = ZHBridgeAction.init(actionId: actionId.longLongValue, name: name, args: args)
+                    let action = ZHBridgeAction.init(actionId: actionId.integerValue, name: name, args: args)
                     if action.isValid {
                         actions.append(action)
                     }
@@ -130,7 +130,8 @@ extension ZHWebViewBridgeProtocol {
             "args": args,
             "argsCount": args.count
         ]
-        zh_evaluateJavaScript("ZHBridge.Core.callJsHandler('\(ZHBridgeHelper.serializeData(handlerInfo))')") { (res:AnyObject?, _:NSError?) in
+        let data = ZHBridgeHelper.serializeData(handlerInfo)
+        zh_evaluateJavaScript("ZHBridge.Core.callJsHandler('\(data)')") { (res:AnyObject?, _:NSError?) in
             callback?(ZHBridgeHelper.unpackResult(res))
         }
     }
@@ -140,11 +141,12 @@ extension ZHWebViewBridgeProtocol {
             return
         }
         let callbackInfo:[String:AnyObject] = [
-            "id": NSNumber.init(longLong: result.actionId),
+            "id": result.actionId,
             "status": result.status,
             "args": (result.result == nil) ? [NSNull()] : [result.result!]
         ]
-        zh_evaluateJavaScript("ZHBridge.Core.callbackJs('\(ZHBridgeHelper.serializeData(callbackInfo))')", completionHandler: nil)
+        let data = ZHBridgeHelper.serializeData(callbackInfo)
+        zh_evaluateJavaScript("ZHBridge.Core.callbackJs('\(data)')", completionHandler: nil)
     }
 }
 
@@ -251,7 +253,7 @@ class ZHWebViewDelegate:NSObject, UIWebViewDelegate {
         delegate?.webViewDidFinishLoad?(webView)
     }
     
-    func webView(webView: UIWebView, didFailLoadWithError error: NSError?) {
+    func webView(webView: UIWebView, didFailLoadWithError error: NSError) {
         delegate?.webView?(webView, didFailLoadWithError: error)
     }
 }
@@ -461,8 +463,7 @@ public class ZHWebViewBridge {
      - returns: true can handle, false can not handle
      */
     private final func canHandle(request: NSURLRequest) -> Bool {
-        let scheme = ZHBridgeName
-        if let url = request.URL where url.scheme.caseInsensitiveCompare(scheme) == .OrderedSame {
+        if let scheme = request.URL?.scheme where scheme.caseInsensitiveCompare(ZHBridgeName) == .OrderedSame {
             return true
         }
         return false
