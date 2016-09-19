@@ -71,7 +71,7 @@ ZHBridge.Core.registerJsHandler(
 bridge.callJsHandler(
             "Device.updateAppVersion",
             args: ["1.2"],
-            callback: { (data:AnyObject?) in
+            callback: { (data:Any?) in
                 // here data should be "js get version: 1.2"
                 ...
         })
@@ -82,7 +82,7 @@ bridge.callJsHandler(
 
 **a**, write and register native handler to bridge
 ```swift
-bridge.registerHandler("Image.updatePlaceHolder") { (args:[AnyObject]) -> (Bool, [AnyObject]?) in
+bridge.registerHandler("Image.updatePlaceHolder") { (args:[Any]) -> (Bool, [Any]?) in
             return (true, ["place_holder.png"])
         }
 ```
@@ -127,6 +127,7 @@ use_frameworks!
 
 pod 'WebViewBridge.Swift'
 ```
+If you use swift 2, use pod 'WebViewBridge.Swift' , '~> 0.1'
 
 ### Carthage
 ```bash
@@ -186,7 +187,7 @@ ZHBridge.Core.registerJsHandler(
 bridge.callJsHandler(
             "Device.updateAppVersion",
             args: ["1.2"],
-            callback: { (data:AnyObject?) in
+            callback: { (data:Any?) in
                 // here data should be "js get version: 1.2"
                 ...
         })
@@ -198,7 +199,7 @@ bridge.callJsHandler(
 
 **a**, 原生代码中, bridge 注册 native handler
 ```swift
-bridge.registerHandler("Image.updatePlaceHolder") { (args:[AnyObject]) -> (Bool, [AnyObject]?) in
+bridge.registerHandler("Image.updatePlaceHolder") { (args:[Any]) -> (Bool, [Any]?) in
             return (true, ["place_holder.png"])
         }
 ```

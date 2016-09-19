@@ -18,33 +18,33 @@ class ZHData {
     ]
     
     var imageFolder:String {
-        let path = (NSTemporaryDirectory() as NSString).stringByAppendingPathComponent("image")
-        if !NSFileManager.defaultManager().fileExistsAtPath(path) {
-            _ = try? NSFileManager.defaultManager().createDirectoryAtPath(path, withIntermediateDirectories: true, attributes: nil)
+        let path = (NSTemporaryDirectory() as NSString).appendingPathComponent("image")
+        if !FileManager.default.fileExists(atPath: path) {
+            _ = try? FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true, attributes: nil)
         }
         return path
     }
     
     var htmlData: String {
-        let path = NSBundle.mainBundle().pathForResource("html_template.html", ofType: nil)!
-        return NSString.init(data: NSFileManager.defaultManager().contentsAtPath(path)!, encoding: NSUTF8StringEncoding) as! String
+        let path = Bundle.main.path(forResource: "html_template.html", ofType: nil)!
+        return NSString.init(data: FileManager.default.contents(atPath: path)!, encoding: String.Encoding.utf8.rawValue) as! String
     }
     
     static let instance = ZHData()
     
     
     
-    func downloadImage(urlPath:String, handler:(String -> Void)) {
+    func downloadImage(_ urlPath:String, handler:@escaping ((String) -> Void)) {
         // urlPath.hashValue may confict, here just from example
         let fileName = "download_image_\(urlPath.hashValue)"
-        let targetPath = (imageFolder as NSString).stringByAppendingPathComponent(fileName)
+        let targetPath = (imageFolder as NSString).appendingPathComponent(fileName)
         
-        if NSFileManager.defaultManager().fileExistsAtPath(targetPath) {
+        if FileManager.default.fileExists(atPath: targetPath) {
             handler(fileName)
         } else {
-            NSURLSession.sharedSession().dataTaskWithURL(NSURL.init(string: urlPath)!, completionHandler: { (data:NSData?, _:NSURLResponse?, _:NSError?) in
-                data?.writeToFile(targetPath, atomically: true)
-                dispatch_async(dispatch_get_main_queue(), {
+            URLSession.shared.dataTask(with: URL.init(string: urlPath)!, completionHandler: { (data:Data?, _:URLResponse?, _:Error?) in
+                try? data?.write(to: URL(fileURLWithPath: targetPath), options: [.atomic])
+                DispatchQueue.main.async(execute: {
                     handler(fileName)
                 })
              }).resume()
