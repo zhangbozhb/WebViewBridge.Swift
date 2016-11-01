@@ -68,7 +68,7 @@ class ZHBridgeActionResult {
 open class ZHBridgeHelper {
     public final class func serializeData(_ data:Any) -> String {
         if let json = try? JSONSerialization.data(withJSONObject: data, options: JSONSerialization.WritingOptions.init(rawValue: 0)) {
-            return NSString.init(data: json, encoding: String.Encoding.utf8.rawValue) as! String
+            return String.init(data: json, encoding: String.Encoding.utf8)!
         }
         return ""
     }
@@ -236,34 +236,39 @@ class ZHBridgeScriptMessageHandlerWrapper:NSObject, ZHBridgeScriptMessageHandler
     }
 }
 
-class ZHWebViewDelegate:NSObject, UIWebViewDelegate {
-    fileprivate weak var delegate:UIWebViewDelegate?
-    fileprivate var webViewDidFinishLoadBlock:((UIWebView) -> Void)?
-    var webViewShouldStartLoadWithRequestBlock:((UIWebView, URLRequest) -> Bool)?
-    
+class ZHWebViewDelegateProxy: NSObject, UIWebViewDelegate {
+    fileprivate weak var original:UIWebViewDelegate?
+    fileprivate weak var proxy:UIWebViewDelegate?
+
     func webView(_ webView: UIWebView, shouldStartLoadWith request: URLRequest, navigationType: UIWebViewNavigationType) -> Bool {
-        return  webViewShouldStartLoadWithRequestBlock?(webView, request) ?? (delegate?.webView?(webView, shouldStartLoadWith: request, navigationType: navigationType) ?? true)
+        if let load = proxy?.webView?(webView, shouldStartLoadWith: request, navigationType: navigationType), !load {
+            return false
+        }
+        return original?.webView?(webView, shouldStartLoadWith: request, navigationType: navigationType) ?? true
     }
     
     func webViewDidStartLoad(_ webView: UIWebView) {
-        delegate?.webViewDidStartLoad?(webView)
+        proxy?.webViewDidStartLoad?(webView)
+        original?.webViewDidStartLoad?(webView)
     }
     
     func webViewDidFinishLoad(_ webView: UIWebView) {
-        webViewDidFinishLoadBlock?(webView)
-        delegate?.webViewDidFinishLoad?(webView)
+        proxy?.webViewDidFinishLoad?(webView)
+        original?.webViewDidFinishLoad?(webView)
     }
     
     func webView(_ webView: UIWebView, didFailLoadWithError error: Error) {
-        delegate?.webView?(webView, didFailLoadWithError: error)
+        proxy?.webView?(webView, didFailLoadWithError: error)
+        original?.webView?(webView, didFailLoadWithError: error)
     }
 }
 
 class ZHWebViewContentController:NSObject {
     fileprivate(set) var webView:UIWebView!
-    fileprivate(set) var delegateUnderProxy = false
+    fileprivate(set) var shouldProxyDelegate = false
+    fileprivate(set) var handleRequestBlock:((UIWebView, URLRequest) -> Bool)?
     fileprivate(set) weak var jsContext:JSContext?
-    fileprivate let delegate = ZHWebViewDelegate()
+    fileprivate var delegateProxy:ZHWebViewDelegateProxy! = ZHWebViewDelegateProxy()
     fileprivate(set) var messageHandlers:[String:Any] = [:]
     fileprivate(set) var pluginScripts = [String]()
     fileprivate var contextKVO:Int = 0
@@ -274,18 +279,14 @@ class ZHWebViewContentController:NSObject {
     init(webView:UIWebView, proxyDelegate:Bool = true) {
         super.init()
         
-        delegateUnderProxy = proxyDelegate
+        shouldProxyDelegate = proxyDelegate
         
         let jsContextPath = self.jsContextPath
         self.webView = webView
         jsContext = webView.value(forKeyPath: jsContextPath) as? JSContext
         webView.addObserver(self, forKeyPath: jsContextPath, options: [.initial, .new], context: &contextKVO)
         
-        delegate.webViewDidFinishLoadBlock = { [weak self] (wb:UIWebView) in
-            if let context = webView.value(forKeyPath: jsContextPath) as? JSContext , self?.jsContext !== context {
-                self?.updateJsContext(context)
-            }
-        }
+        delegateProxy.proxy = self
         updateWebViewDelegate(webView.delegate)
         webView.addObserver(self, forKeyPath: delegatePath, options: [.initial, .new], context: &contextKVO)
     }
@@ -293,6 +294,7 @@ class ZHWebViewContentController:NSObject {
     deinit {
         webView?.removeObserver(self, forKeyPath: jsContextPath)
         webView?.removeObserver(self, forKeyPath: delegatePath)
+        delegateProxy = nil
         webView = nil
     }
     
@@ -312,12 +314,15 @@ class ZHWebViewContentController:NSObject {
     }
     
     fileprivate func updateWebViewDelegate(_ delegate:UIWebViewDelegate?) {
-        if delegate !== self.delegate {
-            self.delegate.delegate = delegate
+        if delegateProxy !== delegate {
+            delegateProxy.original = delegate
         }
-
-        if delegateUnderProxy && webView.delegate !== self.delegate {
-            webView.delegate = self.delegate
+    
+        guard shouldProxyDelegate else {
+            return
+        }
+        if delegate !== delegateProxy {
+            webView.delegate = delegateProxy
         }
     }
     
@@ -363,6 +368,22 @@ class ZHWebViewContentController:NSObject {
     }
 }
 
+extension ZHWebViewContentController: UIWebViewDelegate {
+    // update js contenxt
+    func webViewDidFinishLoad(_ webView: UIWebView) {
+        if let context = webView.value(forKeyPath: jsContextPath) as? JSContext, jsContext !== context {
+            updateJsContext(context)
+        }
+    }
+    
+    func webView(_ webView: UIWebView, shouldStartLoadWith request: URLRequest, navigationType: UIWebViewNavigationType) -> Bool {
+        if let handled = handleRequestBlock?(webView, request) {
+            return !handled
+        }
+        return true
+    }
+}
+
 open class ZHWebViewBridge {
     fileprivate var handlerMapper:[String: (([Any]) -> (Bool, [Any]?))] = [:]
 
@@ -378,7 +399,7 @@ open class ZHWebViewBridge {
     
     /// initial delegate of UIWebView
     open var delegate:UIWebViewDelegate? {
-        return contentController?.delegate.delegate
+        return contentController?.delegateProxy.original
     }
     
     /**
@@ -448,8 +469,8 @@ open class ZHWebViewBridge {
         let contentController = ZHWebViewContentController.init(webView: webView, proxyDelegate: proxyDelegate)
         contentController.addUserPlugin(ZHWebViewBridgeJS)
         contentController.addScriptMessageHandler(messageHandler, name: ZHBridgeName)
-        contentController.delegate.webViewShouldStartLoadWithRequestBlock = { (wb:UIWebView, request:URLRequest) -> Bool in
-            return !bridge.handleRequest(request)
+        contentController.handleRequestBlock = { (wb:UIWebView, request:URLRequest) -> Bool in
+            return bridge.handleRequest(request)
         }
         bridge.contentController = contentController
         
