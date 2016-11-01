@@ -62,7 +62,7 @@ ZHBridge.Core = ZHBridge.Core || (function () {
     if (!data){
       return
     }
-    var callInfo = JSON.parse(data);
+    var callInfo = data;
     var callbackId = callInfo["id"];
     var status = callInfo["status"];
     var args = callInfo["args"];
@@ -86,7 +86,7 @@ ZHBridge.Core = ZHBridge.Core || (function () {
 
   var handlerMapper = {};
   var callJsHandler = function (data) {
-    var callInfo = JSON.parse(data);
+    var callInfo = data ;
     var name = callInfo["name"];
     var args = callInfo["args"];
     var argsCount = callInfo["argsCount"];
