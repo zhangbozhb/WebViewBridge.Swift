@@ -274,6 +274,8 @@ class ZHWebViewContentController:NSObject {
     fileprivate var contextKVO:Int = 0
     fileprivate let jsContextPath = "documentView.webView.mainFrame.javaScriptContext"
     fileprivate let delegatePath = "delegate"
+    private var ignoreWbDelegateKVOOnce = false
+    private var updateWBDelegateLock = NSRecursiveLock.init()
     
     
     init(webView:UIWebView, proxyDelegate:Bool = true) {
@@ -286,14 +288,14 @@ class ZHWebViewContentController:NSObject {
         jsContext = webView.value(forKeyPath: jsContextPath) as? JSContext
         webView.addObserver(self, forKeyPath: jsContextPath, options: [.initial, .new], context: &contextKVO)
         
-        delegateProxy.proxy = self
-        updateWebViewDelegate(webView.delegate)
+        setupProxy(with: webView)
         webView.addObserver(self, forKeyPath: delegatePath, options: [.initial, .new], context: &contextKVO)
     }
     
     deinit {
         webView?.removeObserver(self, forKeyPath: jsContextPath)
         webView?.removeObserver(self, forKeyPath: delegatePath)
+        webView.delegate = delegateProxy.original
         delegateProxy = nil
         webView = nil
     }
@@ -309,21 +311,40 @@ class ZHWebViewContentController:NSObject {
                 updateJsContext(context)
             }
         } else if keyPath == delegatePath {
-            updateWebViewDelegate(change?[NSKeyValueChangeKey.newKey] as? UIWebViewDelegate)
+            updateWebViewDelegateInKVO()
         }
     }
     
-    fileprivate func updateWebViewDelegate(_ delegate:UIWebViewDelegate?) {
-        if delegateProxy !== delegate {
-            delegateProxy.original = delegate
+    @inline(__always) func updateWebViewDelegate() {
+        updateWBDelegateLock.lock()
+        
+        ignoreWbDelegateKVOOnce = true
+        if webView.delegate !== delegateProxy {
+            delegateProxy.original = webView.delegate
         }
+        webView.delegate = delegateProxy
+        
+        updateWBDelegateLock.unlock()
+    }
     
+    fileprivate func setupProxy(with webView:UIWebView) {
         guard shouldProxyDelegate else {
             return
         }
-        if delegate !== delegateProxy {
-            webView.delegate = delegateProxy
+        delegateProxy.proxy = self
+        updateWebViewDelegate()
+    }
+    
+    fileprivate func updateWebViewDelegateInKVO() {
+        guard shouldProxyDelegate, !ignoreWbDelegateKVOOnce else {
+            ignoreWbDelegateKVOOnce = false
+            return
         }
+        
+        guard delegateProxy !== webView.delegate else {
+            return
+        }
+        updateWebViewDelegate()
     }
     
     fileprivate func updateJsContext(_ context:JSContext) {
