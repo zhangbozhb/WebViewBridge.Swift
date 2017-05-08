@@ -33,39 +33,61 @@ import JavaScriptCore
 
 private let ZHBridgeName = "ZHBridge"
 
-class ZHBridgeAction {
-    var actionId:Int = 0
-    var name:String = ""
-    var args:[Any] = []
+
+/// native representation of js action
+struct ZHBridgeAction {
+    /// action id: identifier js action
+    let actionId:Int
     
-    init(actionId:Int, name:String, args:[Any]) {
+    /// action name: the action that js want to call
+    let name:String
+    /// args js pass to action
+    
+    let args:[Any]
+    
+    init(actionId:Int, name:String, args:[Any] = []) {
         self.actionId = actionId
         self.name = name
         self.args = args
     }
     
+    /// check action is valid: true valid, false invalid
     var isValid: Bool {
         return !name.isEmpty
     }
 }
 
-class ZHBridgeActionResult {
-    var actionId:Int = 0
-    var status = true
-    var result:Any?
+/// navtive result for js call
+struct ZHBridgeActionResult {
+    /// js call identifire: js use this for callback
+    let actionId:Int
     
-    init(actionId:Int) {
-        self.actionId = actionId
-    }
+    /// native execute status: true success, false failed
+    let status:Bool
+    
+    /// native execute result
+    let result:Any?
     
     init(actionId:Int, status:Bool, result:Any?) {
         self.actionId = actionId
         self.status = status
         self.result = result
     }
+    
+    /// true if is valid callback for js, false invalid
+    var isValidCallBack: Bool {
+        return actionId != 0
+    }
 }
 
+
+/// bridge helper:  serilize, deserialize data
 open class ZHBridgeHelper {
+    
+    /// json string serialize data
+    ///
+    /// - Parameter data: data
+    /// - Returns: json string type of data
     public final class func serializeData(_ data:Any) -> String {
         if let json = try? JSONSerialization.data(withJSONObject: data, options: JSONSerialization.WritingOptions.init(rawValue: 0)) {
             return String.init(data: json, encoding: String.Encoding.utf8)!
@@ -73,6 +95,10 @@ open class ZHBridgeHelper {
         return ""
     }
     
+    /// deserialize json string data
+    ///
+    /// - Parameter data: json string data
+    /// - Returns: data parsed
     public final class func deserializeData(_ data:String) -> Any? {
         if let encodeData = data.data(using: String.Encoding.utf8), let obj = try? JSONSerialization.jsonObject(with: encodeData, options: JSONSerialization.ReadingOptions.allowFragments) {
             return obj
@@ -80,9 +106,14 @@ open class ZHBridgeHelper {
         return nil
     }
     
-    class func unpackActions(_ obj:Any?) -> [ZHBridgeAction] {
+    
+    /// unpack action
+    ///
+    /// - Parameter data: data from js
+    /// - Returns: actions
+    class func unpackActions(_ data:Any?) -> [ZHBridgeAction] {
         var actions = [ZHBridgeAction]()
-        if let infoString = obj as? String, let infos = self.deserializeData(infoString) as? [[String: Any]] {
+        if let infoString = data as? String, let infos = self.deserializeData(infoString) as? [[String: Any]] {
             for info in infos {
                 if let actionId = info["id"] as? NSNumber, let name = info["name"] as? String, let args = info["args"] as? [Any] {
                     let action = ZHBridgeAction.init(actionId: actionId.intValue, name: name, args: args)
@@ -95,17 +126,15 @@ open class ZHBridgeHelper {
         return actions
     }
     
-    class func unpackResult(_ obj:Any?) -> Any? {
-        if let infoString = obj as? String {
+    /// upack result from js
+    ///
+    /// - Parameter data: data from js
+    /// - Returns: result
+    class func unpackResult(_ data:Any?) -> Any? {
+        if let infoString = data as? String {
             return self.deserializeData(infoString)
         }
         return nil
-    }
-}
-
-extension ZHBridgeActionResult {
-    var validCallBack: Bool {
-        return actionId != 0
     }
 }
 
@@ -118,13 +147,13 @@ protocol ZHWebViewBridgeProtocol:class {
 }
 
 extension ZHWebViewBridgeProtocol {
-    func zh_unpackActions(_ handler:@escaping (([ZHBridgeAction]) -> Void)) {
-        zh_evaluateJavaScript("ZHBridge.Core.getAndClearJsActions()") { (res:Any?, _:Error?) in
-            handler(ZHBridgeHelper.unpackActions(res))
-        }
-    }
-    
-    func zh_callHander(_ handlerName:String, args:[Any], callback:((Any?) -> Void)? = nil) {
+    /// call js handler
+    ///
+    /// - Parameters:
+    ///   - handlerName: name of the js handler to call
+    ///   - args: args pass to js handler
+    ///   - callback: process the js handler result
+    func zh_callJsHandlerFromNative(_ handlerName:String, args:[Any], callback:((Any?) -> Void)? = nil) {
         let handlerInfo:[String : Any] = [
             "name": handlerName,
             "args": args,
@@ -136,8 +165,12 @@ extension ZHWebViewBridgeProtocol {
         }
     }
     
-    func zh_callback(_ result:ZHBridgeActionResult) {
-        if !result.validCallBack {
+    /// call back with action result
+    /// execute js callback with action result
+    ///
+    /// - Parameter result: result of js action
+    func zh_callback(forResult result:ZHBridgeActionResult) {
+        if !result.isValidCallBack {
             return
         }
 
@@ -149,8 +182,21 @@ extension ZHWebViewBridgeProtocol {
         let data = ZHBridgeHelper.serializeData(callbackInfo)
         zh_evaluateJavaScript("ZHBridge.Core.callbackJs(\(data))", completionHandler: nil)
     }
+    
+    /// unpack actions
+    /// UIWebView only:
+    ///
+    /// - Parameter handler: process to actions
+    func zh_unpackActions(_ handler:@escaping (([ZHBridgeAction]) -> Void)) {
+        zh_evaluateJavaScript("ZHBridge.Core.getAndClearJsActions()") { (res:Any?, _:Error?) in
+            handler(ZHBridgeHelper.unpackActions(res))
+        }
+    }
 }
 
+
+
+// MARK: - webview support bridge
 extension UIWebView: ZHWebViewBridgeProtocol {
     func zh_evaluateJavaScript(_ javaScriptString: String, completionHandler: ((Any?, Error?) -> Void)?) {
         let res = stringByEvaluatingJavaScript(from: javaScriptString)
@@ -158,12 +204,16 @@ extension UIWebView: ZHWebViewBridgeProtocol {
     }
 }
 
+
+// MARK: - wkweb view support bridge
 extension WKWebView: ZHWebViewBridgeProtocol {
     func zh_evaluateJavaScript(_ javaScriptString: String, completionHandler: ((Any?, Error?) -> Void)?) {
         evaluateJavaScript(javaScriptString, completionHandler: completionHandler)
     }
 }
 
+
+/// message handler for wkwebview
 class ZHBridgeWKScriptMessageHandler:NSObject, WKScriptMessageHandler {
     fileprivate(set) weak var bridge:ZHWebViewBridge!
     
@@ -178,7 +228,7 @@ class ZHBridgeWKScriptMessageHandler:NSObject, WKScriptMessageHandler {
         }
         
         if let body = message.body as? String , message.name == ZHBridgeName && !body.isEmpty{
-            bridge.handlerActions(ZHBridgeHelper.unpackActions(body))
+            bridge.handleActions(ZHBridgeHelper.unpackActions(body))
         }
     }
 }
@@ -211,9 +261,9 @@ class ZHBridgeWBScriptMessageHandler:ZHScriptMessageHandler {
             return
         }
         
-        if let body = message.body as? String , message.name == ZHBridgeName && !body.isEmpty{
+        if let body = message.body as? String , message.name == ZHBridgeName && !body.isEmpty {
             DispatchQueue.main.async(execute: {
-                bridge.handlerActions(ZHBridgeHelper.unpackActions(body))
+                bridge.handleActions(ZHBridgeHelper.unpackActions(body))
             })
         }
     }
@@ -264,7 +314,7 @@ class ZHWebViewDelegateProxy: NSObject, UIWebViewDelegate {
 }
 
 class ZHWebViewContentController:NSObject {
-    fileprivate(set) var webView:UIWebView!
+    fileprivate(set) var webView:UIWebView
     fileprivate(set) var shouldProxyDelegate = false
     fileprivate(set) var handleRequestBlock:((UIWebView, URLRequest) -> Bool)?
     fileprivate(set) weak var jsContext:JSContext?
@@ -274,17 +324,16 @@ class ZHWebViewContentController:NSObject {
     fileprivate var contextKVO:Int = 0
     fileprivate let jsContextPath = "documentView.webView.mainFrame.javaScriptContext"
     fileprivate let delegatePath = "delegate"
+    fileprivate let jsMessageHandlersKey = "zhbridge_messageHandlers"
     private var ignoreWbDelegateKVOOnce = false
     private var updateWBDelegateLock = NSRecursiveLock.init()
     
     
     init(webView:UIWebView, proxyDelegate:Bool = true) {
+        self.webView = webView
+        shouldProxyDelegate = proxyDelegate
         super.init()
         
-        shouldProxyDelegate = proxyDelegate
-        
-        let jsContextPath = self.jsContextPath
-        self.webView = webView
         jsContext = webView.value(forKeyPath: jsContextPath) as? JSContext
         webView.addObserver(self, forKeyPath: jsContextPath, options: [.initial, .new], context: &contextKVO)
         
@@ -293,11 +342,10 @@ class ZHWebViewContentController:NSObject {
     }
     
     deinit {
-        webView?.removeObserver(self, forKeyPath: jsContextPath)
-        webView?.removeObserver(self, forKeyPath: delegatePath)
+        webView.removeObserver(self, forKeyPath: jsContextPath)
+        webView.removeObserver(self, forKeyPath: delegatePath)
         webView.delegate = delegateProxy.original
         delegateProxy = nil
-        webView = nil
     }
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
@@ -315,7 +363,7 @@ class ZHWebViewContentController:NSObject {
         }
     }
     
-    @inline(__always) func updateWebViewDelegate() {
+    @inline(__always) fileprivate func updateWebViewDelegate() {
         updateWBDelegateLock.lock()
         
         ignoreWbDelegateKVOOnce = true
@@ -354,7 +402,7 @@ class ZHWebViewContentController:NSObject {
     }
     
     fileprivate func updateMessgeHandler() {
-        jsContext?.setObject(messageHandlers, forKeyedSubscript: NSString.init(string: "zhbridge_messageHandlers"))
+        jsContext?.setObject(messageHandlers, forKeyedSubscript: NSString.init(string: jsMessageHandlersKey))
     }
     
     func addScriptMessageHandler(_ scriptMessageHandler: ZHScriptMessageHandler, name: String) {
@@ -387,14 +435,24 @@ class ZHWebViewContentController:NSObject {
     func clearUserPlugin() {
         pluginScripts = []
     }
+    
+    
+    /// update js contentx if needed
+    func updateJsContextIfNeeded() {
+        guard let context = webView.value(forKeyPath: jsContextPath) as? JSContext else {
+            return
+        }
+        
+        if jsContext !== context || context.objectForKeyedSubscript(jsMessageHandlersKey) == nil {
+            updateJsContext(context)
+        }
+    }
 }
 
 extension ZHWebViewContentController: UIWebViewDelegate {
     // update js contenxt
     func webViewDidFinishLoad(_ webView: UIWebView) {
-        if let context = webView.value(forKeyPath: jsContextPath) as? JSContext, jsContext !== context {
-            updateJsContext(context)
-        }
+        updateJsContextIfNeeded()
     }
     
     func webView(_ webView: UIWebView, shouldStartLoadWith request: URLRequest, navigationType: UIWebViewNavigationType) -> Bool {
@@ -450,7 +508,7 @@ open class ZHWebViewBridge {
      - parameter callback:    callback method after js handler
      */
     open func callJsHandler(_ handlerName:String, args:[Any], callback:((Any?) -> Void)? = nil) {
-        bridge?.zh_callHander(handlerName, args: args, callback: callback)
+        bridge?.zh_callJsHandlerFromNative(handlerName, args: args, callback: callback)
     }
     
     /**
@@ -486,10 +544,9 @@ open class ZHWebViewBridge {
         let bridge = ZHWebViewBridge()
         bridge.bridge = webView
         
-        let messageHandler = ZHBridgeWBScriptMessageHandler.init(bridge: bridge)
         let contentController = ZHWebViewContentController.init(webView: webView, proxyDelegate: proxyDelegate)
         contentController.addUserPlugin(ZHWebViewBridgeJS)
-        contentController.addScriptMessageHandler(messageHandler, name: ZHBridgeName)
+        contentController.addScriptMessageHandler(ZHBridgeWBScriptMessageHandler.init(bridge: bridge), name: ZHBridgeName)
         contentController.handleRequestBlock = { (wb:UIWebView, request:URLRequest) -> Bool in
             return bridge.handleRequest(request)
         }
@@ -499,19 +556,6 @@ open class ZHWebViewBridge {
     }
     
     /**
-     check whether request can handle bridge
-     
-     - parameter request: request
-     
-     - returns: true can handle, false can not handle
-     */
-    fileprivate final func canHandle(_ request: URLRequest) -> Bool {
-        if let scheme = request.url?.scheme , scheme.caseInsensitiveCompare(ZHBridgeName) == .orderedSame {
-            return true
-        }
-        return false
-    }
-    /**
      handle a request. this method should be used in webView:shouldStartLoadWithRequest:navigationType: of UIWebViewDelegate
      Note: this method has be deprecated
      
@@ -520,22 +564,17 @@ open class ZHWebViewBridge {
      - returns: true request has handled by bridge
      */
     open func handleRequest(_ request: URLRequest) -> Bool {
-        if canHandle(request) {
+        // check input request is bridge request
+        func isBridgeRequest() -> Bool {
+            if let scheme = request.url?.scheme , scheme.caseInsensitiveCompare(ZHBridgeName) == .orderedSame {
+                return true
+            }
+            return false
+        }
+        if isBridgeRequest() {
             bridge?.zh_unpackActions({ [weak self](actions:[ZHBridgeAction]) in
-                guard let sself = self , !actions.isEmpty else {
-                    return
-                }
-                
-                for action in actions {
-                    let result = ZHBridgeActionResult.init(actionId: action.actionId)
-                    if let handler = sself.handlerMapper[action.name] {
-                        let (status, res) = handler(action.args)
-                        result.status = status
-                        result.result = res
-                    }
-                    sself.bridge?.zh_callback(result)
-                }
-                })
+                self?.handleActions(actions)
+            })
             return true
         }
         return false
@@ -557,21 +596,20 @@ open class ZHWebViewBridge {
         if injectBridgeJs {
             webView.configuration.userContentController.addUserScript(WKUserScript.init(source: ZHWebViewBridgeJS, injectionTime: .atDocumentStart, forMainFrameOnly: true))
         }
-        let messageHandler = ZHBridgeWKScriptMessageHandler.init(bridge: bridge)
-        webView.configuration.userContentController.add(messageHandler, name: ZHBridgeName)
+        webView.configuration.userContentController.add(ZHBridgeWKScriptMessageHandler.init(bridge: bridge), name: ZHBridgeName)
         
         return bridge
     }
     
-    fileprivate func handlerActions(_ actions:[ZHBridgeAction]) {
+    // handle actions
+    @inline(__always) fileprivate func handleActions(_ actions:[ZHBridgeAction]) {
         for action in actions {
-            let result = ZHBridgeActionResult.init(actionId: action.actionId)
             if let handler = handlerMapper[action.name] {
                 let (status, res) = handler(action.args)
-                result.status = status
-                result.result = res
+                bridge?.zh_callback(forResult: ZHBridgeActionResult.init(actionId: action.actionId, status: status, result: res))
+            } else {
+                bridge?.zh_callback(forResult: ZHBridgeActionResult.init(actionId: action.actionId, status: false, result: nil))
             }
-            bridge?.zh_callback(result)
         }
     }
 }
