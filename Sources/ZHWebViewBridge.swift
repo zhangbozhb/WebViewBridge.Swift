@@ -325,7 +325,7 @@ class ZHWebViewContentController:NSObject {
     fileprivate let jsContextPath = "documentView.webView.mainFrame.javaScriptContext"
     fileprivate let delegatePath = "delegate"
     fileprivate let jsMessageHandlersKey = "zhbridge_messageHandlers"
-    private var ignoreWbDelegateKVOOnce = false
+    private var ignoreWbDelegateKVO = false
     private var updateWBDelegateLock = NSRecursiveLock.init()
     
     
@@ -366,12 +366,12 @@ class ZHWebViewContentController:NSObject {
     @inline(__always) fileprivate func updateWebViewDelegate() {
         updateWBDelegateLock.lock()
         
-        ignoreWbDelegateKVOOnce = true
+        ignoreWbDelegateKVO = true
         if webView.delegate !== delegateProxy {
             delegateProxy.original = webView.delegate
         }
         webView.delegate = delegateProxy
-        
+        ignoreWbDelegateKVO = false
         updateWBDelegateLock.unlock()
     }
     
@@ -380,12 +380,12 @@ class ZHWebViewContentController:NSObject {
             return
         }
         delegateProxy.proxy = self
+        ignoreWbDelegateKVO = true
         updateWebViewDelegate()
     }
     
     fileprivate func updateWebViewDelegateInKVO() {
-        guard shouldProxyDelegate, !ignoreWbDelegateKVOOnce else {
-            ignoreWbDelegateKVOOnce = false
+        guard shouldProxyDelegate, !ignoreWbDelegateKVO else {
             return
         }
         
