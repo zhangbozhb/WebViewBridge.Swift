@@ -146,6 +146,17 @@ protocol ZHWebViewBridgeProtocol:class {
                                completionHandler: ((Any?,Error?) -> Void)?)
 }
 
+
+extension DispatchQueue {
+    func zh_safeAsync(_ block: @escaping ()->()) {
+        if self === DispatchQueue.main && Thread.isMainThread {
+            block()
+        } else {
+            async { block() }
+        }
+    }
+}
+
 extension ZHWebViewBridgeProtocol {
     /// call js handler
     ///
@@ -199,8 +210,10 @@ extension ZHWebViewBridgeProtocol {
 // MARK: - webview support bridge
 extension UIWebView: ZHWebViewBridgeProtocol {
     func zh_evaluateJavaScript(_ javaScriptString: String, completionHandler: ((Any?, Error?) -> Void)?) {
-        let res = stringByEvaluatingJavaScript(from: javaScriptString)
-        completionHandler?(res, nil)
+        DispatchQueue.main.zh_safeAsync {
+            let res = self.stringByEvaluatingJavaScript(from: javaScriptString)
+            completionHandler?(res, nil)
+        }
     }
 }
 
@@ -208,7 +221,9 @@ extension UIWebView: ZHWebViewBridgeProtocol {
 // MARK: - wkweb view support bridge
 extension WKWebView: ZHWebViewBridgeProtocol {
     func zh_evaluateJavaScript(_ javaScriptString: String, completionHandler: ((Any?, Error?) -> Void)?) {
-        evaluateJavaScript(javaScriptString, completionHandler: completionHandler)
+        DispatchQueue.main.zh_safeAsync {
+            self.evaluateJavaScript(javaScriptString, completionHandler: completionHandler)
+        }
     }
 }
 
@@ -262,9 +277,9 @@ class ZHBridgeWBScriptMessageHandler:ZHScriptMessageHandler {
         }
         
         if let body = message.body as? String , message.name == ZHBridgeName && !body.isEmpty {
-            DispatchQueue.main.async(execute: {
+            DispatchQueue.main.zh_safeAsync {
                 bridge.handleActions(ZHBridgeHelper.unpackActions(body))
-            })
+            }
         }
     }
 }
