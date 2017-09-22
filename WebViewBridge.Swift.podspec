@@ -27,5 +27,4 @@ Pod::Spec.new do |s|
 
 
   s.source_files  = ["WebViewBridge.Swift/Classes/*.swift", "WebViewBridge.Swift/Classes/*.js"]
-  s.pod_target_xcconfig = { 'SWIFT_VERSION' => '3.0' }
 end
