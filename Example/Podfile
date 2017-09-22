@@ -1,0 +1,5 @@
+use_frameworks!
+
+target 'WebViewBridge.Swift_Example' do
+  pod 'WebViewBridge.Swift', :path => '../'
+end

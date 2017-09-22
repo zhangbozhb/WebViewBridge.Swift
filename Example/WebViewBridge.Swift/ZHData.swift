@@ -26,8 +26,7 @@ class ZHData {
     }
     
     var htmlData: String {
-        let path = Bundle.main.path(forResource: "html_template.html", ofType: nil)!
-        return NSString.init(data: FileManager.default.contents(atPath: path)!, encoding: String.Encoding.utf8.rawValue) as! String
+        return try! String.init(contentsOfFile: Bundle.main.path(forResource: "html_template.html", ofType: nil)!)
     }
     
     static let instance = ZHData()

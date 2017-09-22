@@ -1,5 +1,5 @@
 //
-//  ZHViewController2.swift
+//  ZHViewController1.swift
 //  WebViewBridge.Swift
 //
 //  Created by travel on 16/6/20.
@@ -7,18 +7,19 @@
 //
 
 import UIKit
-import WebKit
+import WebViewBridge_Swift
 
-class ZHViewController2: UIViewController {
+class ZHViewController1: UIViewController, UIWebViewDelegate {
     @IBOutlet weak var container: UIView!
-    var webView:WKWebView!
+    var webView:UIWebView!
     var bridge:ZHWebViewBridge!
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        webView = WKWebView()
+        webView = UIWebView()
+        webView.delegate = self
         webView.frame = view.bounds
         container.addSubview(webView)
         
@@ -57,7 +58,7 @@ class ZHViewController2: UIViewController {
             })
             return (true, nil)
         }
-    
+        
         prepareResources()
         webView.loadHTMLString(ZHData.instance.htmlData, baseURL:  URL.init(fileURLWithPath: ZHData.instance.imageFolder))
     }
@@ -65,6 +66,10 @@ class ZHViewController2: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         webView.frame = container.bounds
+    }
+    
+    func webViewDidFinishLoad(_ webView: UIWebView) {
+        downloadImages()
     }
     
     func prepareResources() {
@@ -84,7 +89,7 @@ class ZHViewController2: UIViewController {
         let alert = UIAlertController.init(title: "ViewImage atIndex \(index)", message: nil, preferredStyle: .alert)
         alert.addAction(UIAlertAction.init(title: "OK", style: .default, handler: { [weak self](_:UIAlertAction) in
             self?.dismiss(animated: false, completion: nil)
-            }))
+        }))
         present(alert, animated: true, completion: nil)
     }
     
@@ -94,7 +99,7 @@ class ZHViewController2: UIViewController {
             let image = images[index]
             ZHData.instance.downloadImage(image, handler: { [weak self](file:String) in
                 self?.bridge.callJsHandler("Image.updateImageAtIndex", args: [file, index], callback: nil)
-                })
+            })
             
         }
     }
@@ -104,4 +109,5 @@ class ZHViewController2: UIViewController {
             downloadImageAtIndex(index)
         }
     }
+    
 }

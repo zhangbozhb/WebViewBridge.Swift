@@ -26,7 +26,6 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/zhangbozhb/WebViewBridge.Swift.git", :tag => s.version }
 
 
-  s.source_files  = ["Sources/*.swift", "Sources/*.js"]
-  s.exclude_files = "Sources/Exclude"
+  s.source_files  = ["WebViewBridge.Swift/Classes/*.swift", "WebViewBridge.Swift/Classes/*.js"]
   s.pod_target_xcconfig = { 'SWIFT_VERSION' => '3.0' }
 end

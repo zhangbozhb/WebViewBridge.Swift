@@ -1,0 +1,16 @@
+PODS:
+  - WebViewBridge.Swift (1.3)
+
+DEPENDENCIES:
+  - WebViewBridge.Swift (from `../`)
+
+EXTERNAL SOURCES:
+  WebViewBridge.Swift:
+    :path: ../
+
+SPEC CHECKSUMS:
+  WebViewBridge.Swift: 943ac8d2c7feb1d9f2c8a75a6c061a874cd19efd
+
+PODFILE CHECKSUM: 1b44b4bd256c18e23da2274d1fe9ed5c889a80ae
+
+COCOAPODS: 1.3.1
