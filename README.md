@@ -1,9 +1,8 @@
 # WebViewBridge.Swift
 
 
-[![Language: Swift 3](https://img.shields.io/badge/language-Swift%203-f48041.svg?style=flat)](https://developer.apple.com/swift)
+[![Language: Swift 4](https://img.shields.io/badge/language-Swift%204-f48041.svg?style=flat)](https://developer.apple.com/swift)
 ![Platform: iOS 8+](https://img.shields.io/badge/platform-iOS%208%2B-blue.svg?style=flat)
-[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 [![Cocoapods compatible](https://img.shields.io/badge/Cocoapods-compatible-4BC51D.svg?style=flat)](https://cocoapods.org)
 [![License: MIT](http://img.shields.io/badge/license-MIT-lightgrey.svg?style=flat)](https://github.com/jiecao-fm/SwiftTheme/blob/master/LICENSE)
 
@@ -127,12 +126,7 @@ use_frameworks!
 
 pod 'WebViewBridge.Swift'
 ```
-If you use swift 2, use pod 'WebViewBridge.Swift' , '~> 0.1'
-
-### Carthage
-```bash
-github "zhangbozhb/WebViewBridge.Swift"
-```
+default support is Swift 4. If you use it in prevous version of Swift. 1.x for Swift3.
 
 
 
