@@ -363,8 +363,10 @@ class ZHWebViewContentController:NSObject {
         shouldProxyDelegate = proxyDelegate
         super.init()
         self.delegateProxy.controller = self
+        delegateProxy.original = webView.delegate
 
         if shouldProxyDelegate {
+            webView.delegate = delegateProxy
             delegateObservation = webView.observe(\UIWebView.delegate, options:  [.initial, .new]) { [weak self](_, values) in
                 guard let sself = self, let nv = values.newValue else {
                     return
