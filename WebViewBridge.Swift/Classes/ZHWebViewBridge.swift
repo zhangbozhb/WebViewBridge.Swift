@@ -142,12 +142,22 @@ open class ZHBridgeHelper {
 private let ZHWebViewBridgeJS = "var ZHBridge=window.ZHBridge||{};window.ZHBridge=ZHBridge;ZHBridge.Core=ZHBridge.Core||(function(){var callbackId=1;var callbacks={};var actionQueue=[];var createBridge=function(){var iFrame;iFrame=document.createElement(\"iframe\");iFrame.setAttribute(\"src\",\"ZHBridge://__BRIDGE_LOADED__\");iFrame.setAttribute(\"style\",\"display:none;\");iFrame.setAttribute(\"height\",\"0px\");iFrame.setAttribute(\"width\",\"0px\");iFrame.setAttribute(\"frameborder\",\"0\");document.body.appendChild(iFrame);setTimeout(function(){document.body.removeChild(iFrame)},0)};var callNativeHandler=function(){var actionName=arguments[0];var actionArgs=arguments[1]||[];var successCallback=arguments[2];var failCallback=arguments[3];var actionId=++callbackId;if(successCallback||failCallback){callbacks[actionId]={success:successCallback,fail:failCallback}}else{actionId=0}var action={id:actionId,name:actionName,args:actionArgs,argsCount:actionArgs.length};if(window.webkit&&window.webkit.messageHandlers&&window.webkit.messageHandlers.ZHBridge&&window.webkit.messageHandlers.ZHBridge.postMessage){window.webkit.messageHandlers.ZHBridge.postMessage(JSON.stringify([action]))}else{if(window.zhbridge_messageHandlers&&window.zhbridge_messageHandlers.ZHBridge&&window.zhbridge_messageHandlers.ZHBridge.postMessage){window.zhbridge_messageHandlers.ZHBridge.postMessage(JSON.stringify([action]))}else{actionQueue.push(action);createBridge()}}};var getAndClearQueuedActions=function(){var json=JSON.stringify(actionQueue);actionQueue=[];return json};var callbackJs=function(){var data=arguments[0];if(!data){return}var callInfo = data;var callbackId=callInfo[\"id\"];var status=callInfo[\"status\"];var args=callInfo[\"args\"];if(!callbackId||status==undefined||args==undefined){return}var callback=callbacks[callbackId];var success=callback[\"success\"];var fail=callback[\"fail\"];if(!callback){return}var result=undefined;if(status&&success){result=success.apply(this,args)}else{if(!status&&fail){result=fail.apply(this,args)}}return result!=undefined?JSON.stringify(result):undefined};var handlerMapper={};var callJsHandler=function(data){var callInfo= data;var name=callInfo[\"name\"];var args=callInfo[\"args\"];var argsCount=callInfo[\"argsCount\"];if(!name||argsCount==undefined||argsCount!=args.length){return}var handler=handlerMapper[name];if(handler){var result=handler.apply(this,args);return result!=undefined?JSON.stringify(result):undefined}};var registerJsHandler=function(handlerName,callback){handlerMapper[handlerName]=callback};var ready=function(){var readyFunction=arguments[0];if(readyFunction){document.addEventListener(\"DOMContentLoaded\",readyFunction)}};return{getAndClearJsActions:getAndClearQueuedActions,callJsHandler:callJsHandler,callbackJs:callbackJs,registerJsHandler:registerJsHandler,callNativeHandler:callNativeHandler,ready:ready}}());"
 
 protocol ZHWebViewBridgeProtocol:class {
+    
+    /// evaluate js
+    ///
+    /// - Parameters:
+    ///   - javaScriptString: js string
+    ///   - completionHandler: complete handler
     func zh_evaluateJavaScript(_ javaScriptString: String,
                                completionHandler: ((Any?,Error?) -> Void)?)
 }
 
 
 extension DispatchQueue {
+    
+    /// run block on ui queue
+    ///
+    /// - Parameter block: block
     func zh_safeAsync(_ block: @escaping ()->()) {
         if self === DispatchQueue.main && Thread.isMainThread {
             block()
@@ -206,20 +216,28 @@ extension ZHWebViewBridgeProtocol {
 }
 
 
-
-// MARK: - webview support bridge
-extension UIWebView: ZHWebViewBridgeProtocol {
+// MARK: - bridge extension for UIWebView
+extension ZHWebViewBridgeProtocol where Self : UIWebView {
     func zh_evaluateJavaScript(_ javaScriptString: String, completionHandler: ((Any?, Error?) -> Void)?) {
         DispatchQueue.main.zh_safeAsync {
             let res = self.stringByEvaluatingJavaScript(from: javaScriptString)
             completionHandler?(res, nil)
         }
     }
+    
+    /// unpack actions
+    ///
+    /// - Parameter handler: process to actions
+    func zh_unpackActions(_ handler:@escaping (([ZHBridgeAction]) -> Void)) {
+        zh_evaluateJavaScript("ZHBridge.Core.getAndClearJsActions()") { (res:Any?, _:Error?) in
+            handler(ZHBridgeHelper.unpackActions(res))
+        }
+    }
 }
 
 
-// MARK: - wkweb view support bridge
-extension WKWebView: ZHWebViewBridgeProtocol {
+// MARK: - bridge extension for WKWebView
+extension ZHWebViewBridgeProtocol where Self : WKWebView {
     func zh_evaluateJavaScript(_ javaScriptString: String, completionHandler: ((Any?, Error?) -> Void)?) {
         DispatchQueue.main.zh_safeAsync {
             self.evaluateJavaScript(javaScriptString, completionHandler: completionHandler)
@@ -227,23 +245,27 @@ extension WKWebView: ZHWebViewBridgeProtocol {
     }
 }
 
+/// bridge action handler
+protocol ZHBridgeActionHandlerProtocol:class {
+    func handleActions(_ actions:[ZHBridgeAction])
+}
 
 /// message handler for wkwebview
 class ZHBridgeWKScriptMessageHandler:NSObject, WKScriptMessageHandler {
-    fileprivate(set) weak var bridge:ZHWebViewBridge!
+    fileprivate(set) weak var handler:ZHBridgeActionHandlerProtocol?
     
-    init(bridge:ZHWebViewBridge) {
+    init(handler:ZHBridgeActionHandlerProtocol) {
         super.init()
-        self.bridge = bridge
+        self.handler = handler
     }
     
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard let bridge = bridge else {
+        guard let handler = handler else {
             return
         }
         
         if let body = message.body as? String , message.name == ZHBridgeName && !body.isEmpty{
-            bridge.handleActions(ZHBridgeHelper.unpackActions(body))
+            handler.handleActions(ZHBridgeHelper.unpackActions(body))
         }
     }
 }
@@ -264,21 +286,21 @@ protocol ZHScriptMessageHandler:class {
 }
 
 class ZHBridgeWBScriptMessageHandler:ZHScriptMessageHandler {
-    fileprivate(set) weak var bridge:ZHWebViewBridge!
+    fileprivate(set) weak var handler:ZHBridgeActionHandlerProtocol?
     
-    init(bridge:ZHWebViewBridge) {
-        self.bridge = bridge
+    init(handler:ZHBridgeActionHandlerProtocol) {
+        self.handler = handler
     }
     
     
     func handle(_ message: ZHScriptMessage) {
-        guard let bridge = bridge else {
+        guard let handler = handler else {
             return
         }
         
         if let body = message.body as? String , message.name == ZHBridgeName && !body.isEmpty {
             DispatchQueue.main.zh_safeAsync {
-                bridge.handleActions(ZHBridgeHelper.unpackActions(body))
+                handler.handleActions(ZHBridgeHelper.unpackActions(body))
             }
         }
     }
@@ -321,8 +343,7 @@ class ZHWebViewDelegateProxy: NSObject, UIWebViewDelegate {
     // 代理实现
     func webViewDidFinishLoad(_ webView: UIWebView) {
         controller?.updateJsContextIfNeeded()
-        
-        original?.webViewDidStartLoad?(webView)
+        original?.webViewDidFinishLoad?(webView)
     }
     
     func webView(_ webView: UIWebView, shouldStartLoadWith request: URLRequest, navigationType: UIWebViewNavigationType) -> Bool {
@@ -439,36 +460,15 @@ class ZHWebViewContentController:NSObject {
     }
 }
 
-open class ZHWebViewBridge: ZHRequestHandler {
-    fileprivate var handlerMapper:[String: (([Any]) -> (Bool, [Any]?))] = [:]
 
-    fileprivate(set) weak var bridge:ZHWebViewBridgeProtocol?
-
-    fileprivate var contentController:ZHWebViewContentController?   // UIWeview only
-
-    fileprivate init(){}
-
+/// native call back to handler js call. Input args array, return tuple. tuple.0 indicate handle status, tuple.1 args array to pass to js callback
+public typealias ZHBridgeActionCallback = (([Any]) -> (Bool, [Any]?))
+class ZHBridgeActionHandlerImpl {
+    var handlerMapper:[String: ZHBridgeActionCallback] = [:]
+    weak var bridge:ZHWebViewBridgeProtocol?
+    
     deinit {
-        teardown()
-    }
-    
-    /// initial delegate of UIWebView
-    open var delegate:UIWebViewDelegate? {
-        return contentController?.delegateProxy.original
-    }
-    
-    /**
-     tear down your bridge, if you call this method, your bridge will not work any more.
-     Note: If you bridge for UIWebView, you should call this method, to release reference of UIWebView
-     */
-    open func teardown() {
-        if let bg = bridge as? WKWebView {
-            bg.configuration.userContentController.removeScriptMessageHandler(forName: ZHBridgeName)
-        }
-        
         handlerMapper = [:]
-        contentController = nil
-        bridge = nil
     }
     
     /**
@@ -477,62 +477,25 @@ open class ZHWebViewBridge: ZHRequestHandler {
      - parameter handlerName: handler name, unique to identify native handler
      - parameter callback:    native call back to handler js call. Input args array, return tuple. tuple.0 indicate handle status, tuple.1 args array to pass to js callback
      */
-    open func registerHandler(_ handlerName:String, callback:@escaping (([Any]) -> (Bool, [Any]?))) {
+    func registerHandler(_ handlerName:String, callback:@escaping ZHBridgeActionCallback) {
         handlerMapper[handlerName] = callback
     }
-    /**
-     call js handler register in js
-     
-     - parameter handlerName: handler name, unique to identify js handler
-     - parameter args:        args that will be pass to registered js handler
-     - parameter callback:    callback method after js handler
-     */
-    open func callJsHandler(_ handlerName:String, args:[Any], callback:((Any?) -> Void)? = nil) {
-        bridge?.zh_callJsHandlerFromNative(handlerName, args: args, callback: callback)
-    }
-    
-    /**
-     adds a user script.
-     Note:  If bridge for UIWebView, you shoul avoid to use this method, in case it will not work as you aspect
-     
-     - parameter source: The user plugin script to add.
-     
-     - returns: whether plugin added success
-     */
-    open func addUserPluginScript(_ source:String) -> Bool {
-        if let _ = bridge as? UIWebView {
-            contentController?.addUserPlugin(source)
-        } else if let webview = bridge as? WKWebView {
-            webview.configuration.userContentController.addUserScript(WKUserScript.init(source: source, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+}
+
+extension ZHBridgeActionHandlerImpl: ZHBridgeActionHandlerProtocol {
+    func handleActions(_ actions: [ZHBridgeAction]) {
+        for action in actions {
+            if let handler = handlerMapper[action.name] {
+                let (status, res) = handler(action.args)
+                bridge?.zh_callback(forResult: ZHBridgeActionResult.init(actionId: action.actionId, status: status, result: res))
+            } else {
+                bridge?.zh_callback(forResult: ZHBridgeActionResult.init(actionId: action.actionId, status: false, result: nil))
+            }
         }
-        return true
     }
-    
-    // MARK: for UIWebView
-    /**
-     set up bridge for webview
-     Note:  1, your should copy bridge js to your html file
-            2, bridge will hold strong reference of UIWebView, you should call unbridge manually
-            3, bridge will replace webView.delegate, if you want to access the origin delegate, use bridge.delegate instead
-     
-     - parameter webView:        webview you want to setup
-     - parameter proxyDelegate: if set to false, your should manual call bridge.handleRequest(:) in method webView:shouldStartLoadWithRequest:navigationType: of UIWebViewDelegate
-     
-     - returns: bridge
-     */
-    open class func bridge(_ webView:UIWebView, proxyDelegate:Bool = true) -> ZHWebViewBridge {
-        let bridge = ZHWebViewBridge()
-        bridge.bridge = webView
-        
-        let contentController = ZHWebViewContentController.init(webView: webView, proxyDelegate: proxyDelegate)
-        contentController.addUserPlugin(ZHWebViewBridgeJS)
-        contentController.addScriptMessageHandler(ZHBridgeWBScriptMessageHandler.init(bridge: bridge), name: ZHBridgeName)
-        contentController.requestHandler = bridge
-        bridge.contentController = contentController
-        
-        return bridge
-    }
-    
+}
+
+extension ZHBridgeActionHandlerImpl: ZHRequestHandler {
     /**
      handle a request. this method should be used in webView:shouldStartLoadWithRequest:navigationType: of UIWebViewDelegate
      Note: this method has be deprecated
@@ -557,37 +520,181 @@ open class ZHWebViewBridge: ZHRequestHandler {
         }
         return false
     }
+}
+
+open class ZHWebViewBridge<WebView: AnyObject> {
+    let actionHander:ZHBridgeActionHandlerImpl
     
-    // MARK: for WKWebView
+    fileprivate(set) weak var bridge:WebView?
+    
+    fileprivate var contentController:ZHWebViewContentController?   // UIWeview only
+    
+    fileprivate init(){
+        actionHander = ZHBridgeActionHandlerImpl.init()
+    }
+    
+    deinit {
+        teardown()
+    }
+    
     /**
-     set up bridge for webview
+     tear down your bridge, if you call this method, your bridge will not work any more.
      
-     - parameter webView:        webview you want to setup
-     - parameter injectBridgeJs: if set to false, your should manual copy bridge js to you html, or refer bridge js in you html header
-     
-     - returns: bridge
+     Note:
+     for UIWebView: recover webview delegate
+     for WKWebView: will remove script handler added by self
      */
-    open class func bridge(_ webView:WKWebView, injectBridgeJs:Bool = true) -> ZHWebViewBridge {
-        let bridge = ZHWebViewBridge()
+    open func teardown() {
+        // WKWebView
+        // remove script message handler
+        if let bg = bridge as? WKWebView {
+            bg.configuration.userContentController.removeScriptMessageHandler(forName: ZHBridgeName)
+        }
+
+        // UIWebView
+        // recover delegate
+        if let bg = bridge as? UIWebView, let delegate = contentController?.delegateProxy.original {
+            bg.delegate = delegate
+        }
+        contentController = nil
+        
+        bridge = nil
+    }
+    
+    /**
+     register a handler to handle js call
+     
+     - parameter handlerName: handler name, unique to identify native handler
+     - parameter callback:    native call back to handler js call. Input args array, return tuple. tuple.0 indicate handle status, tuple.1 args array to pass to js callback
+     */
+    open func registerHandler(_ handlerName:String, callback:@escaping ZHBridgeActionCallback) {
+        actionHander.registerHandler(handlerName, callback: callback)
+    }
+}
+
+
+
+// MARK: - webview support bridge
+extension UIWebView: ZHWebViewBridgeProtocol {
+    
+}
+// MARK: - wkweb view support bridge
+extension WKWebView: ZHWebViewBridgeProtocol {
+}
+
+
+// MARK: - bridge for WKWebView
+extension ZHWebViewBridge where WebView : WKWebView {
+    /**
+     call js handler register in js
+     
+     - parameter handlerName: handler name, unique to identify js handler
+     - parameter args:        args that will be pass to registered js handler
+     - parameter callback:    callback method after js handler
+     */
+    public func callJsHandler(_ handlerName:String, args:[Any], callback:((Any?) -> Void)? = nil) {
+        bridge?.zh_callJsHandlerFromNative(handlerName, args: args, callback: callback)
+    }
+    
+    /// adds a user script.
+    ///
+    /// scripts added to main frame and run at document start
+    ///
+    /// - Parameter source: The user plugin script to add.
+    /// - Returns: whether plugin added success
+    open func addUserPluginScript(_ source:String) -> Bool {
+        bridge?.configuration.userContentController.addUserScript(WKUserScript.init(source: source, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+        return true
+    }
+    
+    /// set up bridge for webview
+    ///
+    /// Note: 1, WKWebView, bridge is one-to-one, muilti bridge for one webview is not allowed and promise to crash.
+    /// 2, bridge release or manual call teardown will will remove script handler added by bridge
+    ///
+    /// - Parameters:
+    ///   - webView: webview you want to setup
+    ///   - injectBridgeJs: if set to false, your should manual copy bridge js to you html, or refer bridge js in you html header
+    /// - Returns: bridge
+    open class func bridge(_ webView:WebView, injectBridgeJs:Bool = true) -> ZHWebViewBridge<WebView> {
+        let bridge = ZHWebViewBridge<WebView>()
         bridge.bridge = webView
+        bridge.actionHander.bridge = webView
         
         if injectBridgeJs {
             webView.configuration.userContentController.addUserScript(WKUserScript.init(source: ZHWebViewBridgeJS, injectionTime: .atDocumentStart, forMainFrameOnly: true))
         }
-        webView.configuration.userContentController.add(ZHBridgeWKScriptMessageHandler.init(bridge: bridge), name: ZHBridgeName)
+        webView.configuration.userContentController.add(ZHBridgeWKScriptMessageHandler.init(handler: bridge.actionHander), name: ZHBridgeName)
+        
+        return bridge
+    }
+}
+
+// MARK: - bridge for UIWebView
+extension ZHWebViewBridge where WebView : UIWebView {
+    /// initial delegate of UIWebView
+    open var delegate:UIWebViewDelegate? {
+        return contentController?.delegateProxy.original
+    }
+    
+    /**
+     call js handler register in js
+     
+     - parameter handlerName: handler name, unique to identify js handler
+     - parameter args:        args that will be pass to registered js handler
+     - parameter callback:    callback method after js handler
+     */
+    public func callJsHandler(_ handlerName:String, args:[Any], callback:((Any?) -> Void)? = nil) {
+        bridge?.zh_callJsHandlerFromNative(handlerName, args: args, callback: callback)
+    }
+    
+    /// adds a user script.
+    ///
+    /// scripts run at webViewDidFinishLoad(:)
+    ///
+    /// - Parameter source: The user plugin script to add.
+    /// - Returns: whether plugin added success
+    open func addUserPluginScript(_ source:String) -> Bool {
+        contentController?.addUserPlugin(source)
+        return true
+    }
+    
+    /**
+     set up bridge for webview
+     Note:  1, your should copy bridge js to your html file
+     2, bridge will replace webView.delegate, if you want to access the origin delegate, use bridge.delegate instead
+     3, multi bridge for on webview is not allowed, or else bridge behavior is unexpected
+     4, bridge release or manual call teardown will recover webview delegate
+     
+     - parameter webView:        webview you want to setup
+     - parameter proxyDelegate: if set to false, your should manual call bridge.handleRequest(:) in method webView:shouldStartLoadWithRequest:navigationType: of UIWebViewDelegate
+     
+     - returns: bridge
+     */
+    open class func bridge(_ webView:WebView, proxyDelegate:Bool = true) -> ZHWebViewBridge<WebView> {
+        let bridge = ZHWebViewBridge<WebView>()
+        bridge.bridge = webView
+        bridge.actionHander.bridge = webView
+        
+        let contentController = ZHWebViewContentController.init(webView: webView, proxyDelegate: proxyDelegate)
+        contentController.addUserPlugin(ZHWebViewBridgeJS)
+        contentController.addScriptMessageHandler(ZHBridgeWBScriptMessageHandler.init(handler: bridge.actionHander), name: ZHBridgeName)
+        contentController.requestHandler = bridge.actionHander
+        bridge.contentController = contentController
         
         return bridge
     }
     
-    // handle actions
-    @inline(__always) fileprivate func handleActions(_ actions:[ZHBridgeAction]) {
-        for action in actions {
-            if let handler = handlerMapper[action.name] {
-                let (status, res) = handler(action.args)
-                bridge?.zh_callback(forResult: ZHBridgeActionResult.init(actionId: action.actionId, status: status, result: res))
-            } else {
-                bridge?.zh_callback(forResult: ZHBridgeActionResult.init(actionId: action.actionId, status: false, result: nil))
-            }
-        }
+    /**
+     handle a request. this method should be used in webView:shouldStartLoadWithRequest:navigationType: of UIWebViewDelegate
+     
+     - parameter request: request
+     
+     - returns: true request has handled by bridge
+     */
+    open func handleRequest(_ request: URLRequest) -> Bool {
+        return actionHander.handleRequest(request)
     }
+    
 }
+

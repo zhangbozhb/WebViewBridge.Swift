@@ -41,8 +41,8 @@ If your have any question, you can email me(zhangbozhb@gmail.com) or leave messa
 
 **1** Set up bridge for your UIWebView/WKWebView
 ```swift
-let webView = WKWebView()/UIWebView()
-let bridge = ZHWebViewBridge.bridge(webView)
+let bridge = ZHWebViewBridge<WKWebView>.bridge(WKWebView())
+let bridge = ZHWebViewBridge<UIWebView>.bridge(UIWebView())
 ```
 * Note: if you set bridge for UIWebView
     * copy bridge.js to your html file
@@ -106,9 +106,9 @@ ZHBridge.Core.callNativeHandler(
 
 
 #### 3, Others
-**a**, add user plugin script(UIWebView not support)
+**a**, add user plugin script
 ```swift
-bridge.addUserPluginScript("your script")   // WKWebView only
+bridge.addUserPluginScript("your script")   // when run your plugin: WKWebView at document start， UIWebview will try to run script webViewDidStartLoad(:) webViewDidFinishLoad(:)
 ```
 
 
@@ -152,8 +152,8 @@ WebViewBridge.Swift 给你提供了另一种可能, 与其他相比由以下优�
 
 **1** 给 UIWebView/WKWebView 建立桥
 ```swift
-let webView = WKWebView()
-let bridge = ZHWebViewBridge.bridge(webView)
+let bridge = ZHWebViewBridge<WKWebView>.bridge(WKWebView())
+let bridge = ZHWebViewBridge<UIWebView>.bridge(UIWebView())
 ```
 
 * Note: 对于 UIWebView 需要注意一下事情
@@ -219,5 +219,5 @@ ZHBridge.Core.callNativeHandler(
 #### 3, 其他
 **a**, 添加其他的插件代码(UIWebView 不支持)
 ```swift
-bridge.addUserPluginScript("your script")   // WKWebView only
+bridge.addUserPluginScript("your script")   // 插件脚本执行时机: WKWebView document 在 main frame 开始的时候， UIWebview 会 delegate 回调 webViewDidStartLoad(:) 和 webViewDidFinishLoad(:) 均会调用
 ```

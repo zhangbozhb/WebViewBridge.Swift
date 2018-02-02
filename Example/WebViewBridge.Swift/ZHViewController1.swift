@@ -12,7 +12,7 @@ import WebViewBridge_Swift
 class ZHViewController1: UIViewController, UIWebViewDelegate {
     @IBOutlet weak var container: UIView!
     var webView:UIWebView!
-    var bridge:ZHWebViewBridge!
+    var bridge:ZHWebViewBridge<UIWebView>!
     
     
     override func viewDidLoad() {

@@ -1,5 +1,5 @@
 PODS:
-  - WebViewBridge.Swift (1.3)
+  - WebViewBridge.Swift (2.1)
 
 DEPENDENCIES:
   - WebViewBridge.Swift (from `../`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: ../
 
 SPEC CHECKSUMS:
-  WebViewBridge.Swift: 943ac8d2c7feb1d9f2c8a75a6c061a874cd19efd
+  WebViewBridge.Swift: 040f70a429a1607172b6d47ab6c78aa7444fd301
 
 PODFILE CHECKSUM: 1b44b4bd256c18e23da2274d1fe9ed5c889a80ae
 
