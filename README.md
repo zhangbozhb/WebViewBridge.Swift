@@ -46,7 +46,7 @@ let bridge = ZHWebViewBridge<UIWebView>.bridge(UIWebView())
 ```
 * Note: if you set bridge for UIWebView
     * copy bridge.js to your html file
-    * manually call bridge.teardown() to release strong reference to your UIWebView
+    * manually call bridge.teardown() or release bridge, bridge will recover UIWebView.delegate
 
 
 ### Native JS code Interaction
@@ -62,6 +62,7 @@ ZHBridge.Core.registerJsHandler(
             return "js get version: " + version;
           });
 ```
+version before 2.2, please use ZHWebViewBridge.bridge(UIWebView())
 
 * Note: ZHBridge.Core.registerJsHandler(handlerName, callback)
 
@@ -155,10 +156,11 @@ WebViewBridge.Swift 给你提供了另一种可能, 与其他相比由以下优�
 let bridge = ZHWebViewBridge<WKWebView>.bridge(WKWebView())
 let bridge = ZHWebViewBridge<UIWebView>.bridge(UIWebView())
 ```
+2.2之前的版本：使用 ZHWebViewBridge.bridge(UIWebView())
 
 * Note: 对于 UIWebView 需要注意一下事情
-    * 拷贝 bridge.js 代码到你的html文件中
-    * 需要主动调用 bridge.teardown() 用于释放对你的 UIWebView的强引用
+    * 拷贝 bridge.js 代码到你的html文件中(对于 UIWebView，如果没有拷贝，默认行为，会修改 UIWebView delegate，然后 自动 webViewDidFinishLoad: 的时候加入 bridge.js)
+    * 主动调用 bridge.teardown 或者 bridge 释放的时候，会自动恢复 delegate
 
 ### 原生代码与 JS 的相互交互
 
@@ -217,7 +219,7 @@ ZHBridge.Core.callNativeHandler(
 * 说明: ZHBridge.Core.callNativeHandler(handlerName, 传递给原生handler的参数数组, 成功回调, 失败回调)
 
 #### 3, 其他
-**a**, 添加其他的插件代码(UIWebView 不支持)
+**a**, 添加其他的插件代码
 ```swift
 bridge.addUserPluginScript("your script")   // 插件脚本执行时机: WKWebView document 在 main frame 开始的时候， UIWebview 会 delegate 回调 webViewDidStartLoad(:) 和 webViewDidFinishLoad(:) 均会调用
 ```
