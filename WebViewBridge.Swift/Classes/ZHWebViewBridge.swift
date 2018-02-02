@@ -462,6 +462,10 @@ open class ZHWebViewBridge: ZHRequestHandler {
      Note: If you bridge for UIWebView, you should call this method, to release reference of UIWebView
      */
     open func teardown() {
+        if let bg = bridge as? WKWebView {
+            bg.configuration.userContentController.removeScriptMessageHandler(forName: ZHBridgeName)
+        }
+        
         handlerMapper = [:]
         contentController = nil
         bridge = nil
