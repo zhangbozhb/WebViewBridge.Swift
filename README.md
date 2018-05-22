@@ -15,11 +15,12 @@ Honestly speaking, WebViewBridge.Swift provides you another choice, but far from
     - Cordova(PhoneGap) is a great project and cross platform, well tested. However if we do not want to develop hybrid app, it seems kind of too complex and hard to integrate to our app.
     - WebViewJavascriptBridge is simple and have both iOS and android version.
     - Disadvantages:
-        - both of them use iframe, not easy to use
+        - both of them use iframe(UIWebView), not easy to use
         - no swift version.
 - WebViewBridge.Swift:
     - Use JavaScriptCore, deprecate iframe(not all, may use iframe before webViewDidFinishLoad).
     - Full Swift, and easy to use.
+    - Support both UIWebView and WKWebView
 
 If you just want to integrate bridge feature to you app, WebViewBridge.Swift supplies you another choice. It's brief, simple, optimized for ios, but works well.
 
