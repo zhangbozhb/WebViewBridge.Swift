@@ -4,7 +4,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "WebViewBridge.Swift"
-  s.version      = "2.2"
+  s.version      = "2.3"
   s.summary      = "A bridge for WebView(UIWebView, WKWebView), using JavaScriptCore, handles messages between native(Swift) and js"
 
   s.description  = <<-DESC

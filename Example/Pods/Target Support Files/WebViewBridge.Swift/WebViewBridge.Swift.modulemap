@@ -1,0 +1,6 @@
+framework module WebViewBridge_Swift {
+  umbrella header "WebViewBridge.Swift-umbrella.h"
+
+  export *
+  module * { export * }
+}
