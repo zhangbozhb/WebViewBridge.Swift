@@ -4,7 +4,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "WebViewBridge.Swift"
-  s.version      = "2.3"
+  s.version      = "2.4"
   s.summary      = "A bridge for WebView(UIWebView, WKWebView), using JavaScriptCore, handles messages between native(Swift) and js"
 
   s.description  = <<-DESC
@@ -19,6 +19,7 @@ Pod::Spec.new do |s|
   s.author             = { "travel" => "zhangbozhb@gmail.com" }
   s.social_media_url   = "http://twitter.com/travel_zh"
 
+  s.swift_version = '4.2'
   s.ios.deployment_target = "8.0"
   # s.watchos.deployment_target = "2.0"
   # s.tvos.deployment_target = "9.0"

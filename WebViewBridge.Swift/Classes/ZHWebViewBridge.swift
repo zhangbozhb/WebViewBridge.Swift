@@ -278,11 +278,12 @@ protocol ZHScriptMessageHandler: class {
     func handle(_ message: ZHScriptMessage)
 }
 
-class ZHBridgeWBScriptMessageHandler: ZHScriptMessageHandler {
+class ZHBridgeWBScriptMessageHandler: NSObject, ZHScriptMessageHandler {
     fileprivate(set) weak var handler: ZHBridgeActionHandlerProtocol?
 
     init(handler: ZHBridgeActionHandlerProtocol) {
         self.handler = handler
+        super.init()
     }
 
     func handle(_ message: ZHScriptMessage) {
@@ -308,6 +309,7 @@ class ZHBridgeScriptMessageHandlerWrapper: NSObject, ZHBridgeScriptMessageHandle
     init(name: String, handler: ZHScriptMessageHandler) {
         self.name = name
         self.handler = handler
+        super.init()
     }
 
     func postMessage(_ body: Any?) {
@@ -361,10 +363,22 @@ class ZHWebViewContentController: NSObject {
 
     fileprivate(set) weak var requestHandler: ZHRequestHandler?
 
-    fileprivate(set) var messageHandlers: [String: Any] = [:]
+    fileprivate(set) var messageHandler = InnerMessageHandler.init()
     fileprivate(set) var pluginScripts = [String]()
     fileprivate let jsContextPath = "documentView.webView.mainFrame.javaScriptContext"
     fileprivate let jsMessageHandlersKey = "zhbridge_messageHandlers"
+
+    class InnerMessageHandler: NSObject {
+        var messageHandlers: [String: ZHBridgeScriptMessageHandlerWrapper] = [:]
+
+        override init() {
+            super.init()
+        }
+
+        func addScriptMessageHandler(_ scriptMessageHandler: ZHScriptMessageHandler, name: String) {
+            messageHandlers[name] = ZHBridgeScriptMessageHandlerWrapper.init(name: name, handler: scriptMessageHandler)
+        }
+    }
 
     init(webView: UIWebView, proxyDelegate: Bool = true) {
         self.webView = webView
@@ -401,11 +415,11 @@ class ZHWebViewContentController: NSObject {
     }
 
     fileprivate func updateMessgeHandler() {
-        jsContext?.setObject(messageHandlers, forKeyedSubscript: NSString.init(string: jsMessageHandlersKey))
+        jsContext?.setObject(messageHandler, forKeyedSubscript: jsMessageHandlersKey as NSString)
     }
 
     func addScriptMessageHandler(_ scriptMessageHandler: ZHScriptMessageHandler, name: String) {
-        messageHandlers[name] = ZHBridgeScriptMessageHandlerWrapper.init(name: name, handler: scriptMessageHandler)
+        messageHandler.addScriptMessageHandler(scriptMessageHandler, name: name)
         updateMessgeHandler()
     }
 
