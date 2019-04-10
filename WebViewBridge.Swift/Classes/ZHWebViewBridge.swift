@@ -153,7 +153,7 @@ extension DispatchQueue {
     /// run block on ui queue
     ///
     /// - Parameter block: block
-    func zh_safeAsync(_ block: @escaping ()->Void) {
+    func zh_safeAsync(_ block: @escaping () -> Void) {
         if self === DispatchQueue.main && Thread.isMainThread {
             block()
         } else {

@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "C53CAC83C9795ED22C0B51A2EB9EEF46"
+               BlueprintIdentifier = "26C18A2CB904B59BF4F699B795103E95"
                BuildableName = "Pods_WebViewBridge_Swift_Example.framework"
                BlueprintName = "Pods-WebViewBridge.Swift_Example"
                ReferencedContainer = "container:Pods.xcodeproj">
@@ -45,7 +45,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "C53CAC83C9795ED22C0B51A2EB9EEF46"
+            BlueprintIdentifier = "26C18A2CB904B59BF4F699B795103E95"
             BuildableName = "Pods_WebViewBridge_Swift_Example.framework"
             BlueprintName = "Pods-WebViewBridge.Swift_Example"
             ReferencedContainer = "container:Pods.xcodeproj">
